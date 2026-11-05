@@ -1,14 +1,14 @@
-# VoiceInput — 给 OpenCode / Claude Code 用的语音输入
+# VoiceInput — 适用于所有编辑器、终端等的语音输入
 
 按住 **右 Option（⌥）** 说话，松开后自动把语音转成文字并输入到当前终端窗口。
-对 OpenCode、Claude Code、任何编辑器或聊天框都通用。
+对任何编辑器或聊天框都通用。
 
 - 原生 macOS 菜单栏 App，Swift 编写，无 Node / Python 依赖
 - 使用 Apple 系统语音识别，**免费、无需 API Key**
 - 默认优先使用**设备端识别**，语音不出本机
 - 中文（`zh-CN`）为主，中英混说可用；技术词可通过 `contextualStrings` 增强
 
-> 为什么不做成 OpenCode 插件：OpenCode / Claude Code 的插件运行在各自的进程里，
+> 为什么不做成插件：插件运行在各自的进程里，
 > 既拿不到麦克风，也无法向终端模拟键盘输入。系统级菜单栏工具才是正确架构，
 > 而且一次做好，两边都能用。
 
@@ -48,7 +48,7 @@ cd voice-input
 
 ## 使用
 
-1. 光标停在 OpenCode / Claude Code 的输入框里
+1. 光标停在任意输入框里
 2. 按住 **右 Option**，看到底部“正在聆听…”后说话
 3. 松开，文字自动出现在输入框
 4. 按回车发送
@@ -79,7 +79,7 @@ cd voice-input
   "playFeedbackSound": true,      // 开始/结束提示音
   "showHUD": true,                // 底部悬浮提示
   "hudOpacity": 0.45,             // 悬浮窗蒙层不透明度，0.30 ~ 1.0，越小越透明
-  "contextualStrings": ["OpenCode", "Claude Code", "插件", "终端"]
+  "contextualStrings": ["插件", "终端"],
 }
 ```
 
@@ -126,7 +126,7 @@ cd voice-input
 - 点菜单里的「辅助功能：未授权」，会自动清理旧记录并打开系统设置，重新把 VoiceInput 的开关打开即可
 - 仍然不行就把列表里的旧 VoiceInput 用 `-` 删掉，再 `+` 添加 `/Applications/VoiceInput.app`
 
-**Claude Code 未安装也能用吗**
+
 
 - 能。这是系统级输入工具，与具体 CLI 无关；只要光标在任意输入框里就能用
 
@@ -165,8 +165,8 @@ tools/
 
 ## 后续可加
 
-- 朗读 AI 回复（TTS）：需要按工具对接输出流，OpenCode 可通过 HTTP API/事件订阅，
-  Claude Code 可通过 hooks/日志，二者实现方式不同
+- 朗读 AI 回复（TTS）：需要按工具对接输出流，可通过 HTTP API/事件订阅，
+
 - 云端识别：OpenAI 兼容的 `/audio/transcriptions`（OpenAI、硅基流动、Groq 等），
   适合对技术术语和中英混说准确率要求更高的场景
 - 自定义快捷键、双击 Fn 切换模式、识别历史
