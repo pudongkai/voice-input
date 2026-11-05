@@ -175,3 +175,24 @@ tools/
 - 云端识别：OpenAI 兼容的 `/audio/transcriptions`（OpenAI、硅基流动、Groq 等），
   适合对技术术语和中英混说准确率要求更高的场景
 - 自定义快捷键、双击 Fn 切换模式、识别历史
+
+## 打赏
+
+觉得好用？请作者喝杯咖啡。VoiceInput 永久免费，打赏完全自愿，金额随意。
+
+<table>
+  <tr>
+    <td align="center"><b>微信</b></td>
+    <td align="center"><b>支付宝</b></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="site/assets/donate-wechat.png" alt="微信收款码" width="220" /></td>
+    <td align="center"><img src="site/assets/donate-alipay.png" alt="支付宝收款码" width="220" /></td>
+  </tr>
+  <tr>
+    <td align="center">打开微信「扫一扫」</td>
+    <td align="center">打开支付宝「扫一扫」</td>
+  </tr>
+</table>
+
+收款人：Eoccc（**凯）
