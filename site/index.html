@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceInput – 语音输入工具</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header>
+        <h1>VoiceInput</h1>
+        <p>适用于所有编辑器、终端等的语音输入工具</p>
+    </header>
+
+    <section class="download">
+        <h2>下载</h2>
+        <p>请先在 <a href="https://github.com/pudongkai/voice-input/releases">GitHub Release 页面</a> 下载最新的 <code>.dmg</code> 或 <code>.zip</code> 包。</p>
+        <ul>
+            <li><a href="https://github.com/pudongkai/voice-input/releases/latest/download/VoiceInput-1.1.6.dmg">VoiceInput-1.1.6.dmg</a></li>
+            <li><a href="https://github.com/pudongkai/voice-input/releases/latest/download/VoiceInput-1.1.6.zip">VoiceInput-1.1.6.zip</a></li>
+        </ul>
+        <p>安装后直接拖入 <code>/Applications</code> 即可使用。</p>
+    </section>
+
+    <section class="features">
+        <h2>主要特性</h2>
+        <ul>
+            <li>原生 macOS 菜单栏 App，无需任何运行时依赖</li>
+            <li>使用系统自带的 Apple 语音识别（免费、无需 API Key）</li>
+            <li>支持本地离线模型，隐私安全</li>
+            <li>透明度可调，实时预览</li>
+            <li>粘贴或键盘输入两种模式，自由切换</li>
+            <li>开机自启动、配置热加载</li>
+        </ul>
+    </section>
+
+    <section class="usage">
+        <h2>快速使用</h2>
+        <ol>
+            <li>安装后打开 <code>VoiceInput.app</code>（首次需要授权麦克风、语音识别、辅助功能）</li>
+            <li>在任意编辑器/终端光标处按住 <strong>右 Option（⌥）</strong>，说话后松开即可自动输入文字</li>
+            <li>可在菜单栏图标中调节透明度、开启/关闭开机启动、切换输入方式等</li>
+        </ol>
+    </section>
+
+    <section class="faq">
+        <h2>常见问题</h2>
+        <dl>
+            <dt>为什么需要授权辅助功能？</dt>
+            <dd>辅助功能是 macOS 用来让第三方程序模拟键盘或粘贴的权限，只要授权一次即可。</dd>
+            <dt>如何保持剪贴板内容？</dt>
+            <dd>在设置页面把 <code>restoreClipboard</code> 设为 <code>false</code>，识别结果会保留在剪贴板。</dd>
+        </dl>
+    </section>
+
+    <footer>
+        <p>© 2026 Pudongkai. <a href="https://github.com/pudongkai/voice-input">GitHub 项目</a></p>
+    </footer>
+</body>
+</html>
