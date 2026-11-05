@@ -1,0 +1,10 @@
+build/
+.DS_Store
+dist/
+*.dmg
+*.zip
+*.app
+.idea/
+*.xcworkspace
+*.xcodeproj/
+*.log
