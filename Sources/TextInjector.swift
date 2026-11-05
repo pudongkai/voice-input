@@ -73,7 +73,7 @@ enum TextInjector {
         up?.post(tap: .cghidEventTap)
     }
 
-    /// 直接发送 Unicode 键盘事件，不走剪贴板。部分终端对这种方式支持较差，作为备选。
+    /// 直接发送 Unicode 键盘事件，不走剪贴板。默认输入方式。
     private static func typeUnicode(_ text: String) {
         guard let source = CGEventSource(stateID: .hidSystemState) else { return }
         let units = Array(text.utf16)

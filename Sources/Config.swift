@@ -16,7 +16,7 @@ struct Config: Codable {
     init() {
         locale = "zh-CN"
         hotkey = "rightOption"
-        insertMethod = "paste"
+        insertMethod = "type"
         restoreClipboard = false
         onDeviceRecognition = true
         maxRecordingSeconds = 60

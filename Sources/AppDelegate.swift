@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var config = Config.load()
     private var session: SpeechSession?
     private var state: State = .idle
+    private var openedDictationSettings = false
     private var lastTranscript = ""
     private var accessTimer: Timer?
     private var accessibilityWasTrusted = false
@@ -232,26 +233,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         case .failure(let error):
             let message = error.localizedDescription
-            Log.write("recognition failed: \(message)")
+            let nsError = error as NSError
+            Log.write("recognition failed: \(nsError.domain) \(nsError.code) \(message)")
+            if Permissions.isDictationDisabledError(error) {
+                handleDictationDisabled()
+                return
+            }
             notify("识别失败：\(message)")
         }
     }
 
     // MARK: - UI helpers
 
+    /// 录音时图标变红，并在背后淡入一块浅红色圆角底，与官网演示的效果一致。
     private func setRecordingIcon(_ recording: Bool) {
-        let name = recording ? "mic.circle.fill" : "mic.fill"
-        if let image = NSImage(systemSymbolName: name, accessibilityDescription: "语音输入") {
-            image.isTemplate = true
-            statusItem.button?.image = image
-        }
-        statusItem.button?.contentTintColor = recording ? .systemRed : nil
+        guard let button = statusItem.button else { return }
+        button.contentTintColor = recording ? .systemRed : nil
+
+        button.wantsLayer = true
+        guard let layer = button.layer else { return }
+        layer.cornerRadius = 5
+        layer.cornerCurve = .continuous
+
+        // 视图自带的 layer 默认不做隐式动画，这里显式加一个颜色渐变。
+        let target = recording ? NSColor.systemRed.withAlphaComponent(0.18).cgColor : NSColor.clear.cgColor
+        let fade = CABasicAnimation(keyPath: "backgroundColor")
+        fade.fromValue = layer.presentation()?.backgroundColor ?? layer.backgroundColor
+        fade.toValue = target
+        fade.duration = 0.2
+        fade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        layer.backgroundColor = target
+        layer.add(fade, forKey: "recordingBackdrop")
     }
 
-    private func showNotice(_ title: String, _ body: String) {
+    /// 设置页每次运行只自动打开一次，避免用户每按一次快捷键就被弹一次窗口。
+    private func handleDictationDisabled() {
+        notify("请先打开系统「听写」：系统设置 → 键盘 → 听写")
+        guard !openedDictationSettings else { return }
+        openedDictationSettings = true
+        Permissions.openDictationSettings()
+    }
+
+    private func showNotice(_ title: String, _ body: String, duration: TimeInterval = 2.6) {
         Log.write("notice: \(title) - \(body)")
         if config.showHUD {
-            hud.showInfo(title: title, body: body, autoHide: 2.6)
+            hud.showInfo(title: title, body: body, autoHide: duration)
         }
     }
 
@@ -304,13 +330,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                                     action: #selector(openSpeechSettings)))
         menu.addItem(permissionItem(title: "辅助功能", granted: Permissions.accessibilityGranted,
                                     action: #selector(openAccessibilitySettings)))
+        menu.addItem(permissionItem(title: "听写", granted: Permissions.dictationEnabled,
+                                    action: #selector(openDictationSettings),
+                                    grantedText: "已开启", deniedText: "未开启"))
 
         menu.addItem(.separator())
 
         let insertItem = NSMenuItem(title: "输入方式", action: nil, keyEquivalent: "")
         let insertMenu = NSMenu()
-        insertMenu.addItem(methodItem(title: "粘贴", value: "paste"))
         insertMenu.addItem(methodItem(title: "模拟键盘输入", value: "type"))
+        insertMenu.addItem(methodItem(title: "粘贴（同时复制到剪贴板）", value: "paste"))
         insertItem.submenu = insertMenu
         menu.addItem(insertItem)
 
@@ -369,7 +398,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let loginStatus = SMAppService.mainApp.status
         let loginTitle: String
         switch loginStatus {
-        case .enabled: loginTitle = "开机启动（已开启）"
         case .requiresApproval: loginTitle = "开机启动（需在系统设置中批准）"
         default: loginTitle = "开机启动"
         }
@@ -386,15 +414,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(quit)
     }
 
-    private func permissionItem(title: String, granted: Bool, action: Selector) -> NSMenuItem {
+    private func permissionItem(
+        title: String,
+        granted: Bool,
+        action: Selector,
+        grantedText: String = "已授权",
+        deniedText: String = "未授权"
+    ) -> NSMenuItem {
         let item = NSMenuItem(
-            title: "\(title)：\(granted ? "已授权" : "未授权")",
+            title: "\(title)：\(granted ? grantedText : deniedText)",
             action: action,
             keyEquivalent: ""
         )
         item.target = self
-        item.state = granted ? .on : .off
+        // 用彩色圆点代替对勾，和下面的开关项区分开：绿色已授权，橙色未授权。
+        item.state = .on
+        item.onStateImage = statusDot(granted ? .systemGreen : .systemOrange)
         return item
+    }
+
+    private func statusDot(_ color: NSColor) -> NSImage {
+        let size = NSSize(width: 8, height: 8)
+        let image = NSImage(size: size, flipped: false) { rect in
+            color.setFill()
+            NSBezierPath(ovalIn: rect).fill()
+            return true
+        }
+        image.isTemplate = false
+        return image
     }
 
     private func methodItem(title: String, value: String) -> NSMenuItem {
@@ -440,20 +487,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    @objc private func openDictationSettings() {
+        Permissions.openDictationSettings()
+    }
+
     @objc private func openAccessibilitySettings() {
         guard !Permissions.accessibilityGranted else {
             Permissions.openAccessibilitySettings()
             return
         }
 
-        // 先删掉旧签名对应的失效条目，再让系统重新登记当前版本。
+        // 先在后台删掉旧签名对应的失效条目，再让系统重新登记当前版本。
+        // 登记完成后列表里才会出现 VoiceInput，所以设置页要等一会儿再打开。
         resetAccessibilityPermission()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             Permissions.promptAccessibility()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             Permissions.openAccessibilitySettings()
-            self.showNotice("已清理旧授权", "请在系统设置中重新打开 VoiceInput 的辅助功能开关")
+            self?.showNotice("打开 VoiceInput 的开关", "列表里没有的话，点下方「+」从「应用程序」添加 VoiceInput",
+                            duration: 10)
         }
     }
 
