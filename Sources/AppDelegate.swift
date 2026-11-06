@@ -71,8 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "语音输入")
-            button.image?.isTemplate = true
+            button.image = Self.idleIcon
             button.toolTip = "VoiceInput \(appVersion)：按住右 Option 说话"
         }
         menu.delegate = self
@@ -262,25 +261,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     // MARK: - UI helpers
 
-    /// 录音时图标变红，并在背后淡入一块浅红色圆角底，与官网演示的效果一致。
+    private static let idleIcon: NSImage? = {
+        let image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "语音输入")
+        image?.isTemplate = true
+        return image
+    }()
+
+    /// 录音状态与官网演示一致：浅红色圆角底上放红色话筒。
+    /// 底色和图标画进同一张图片，尺寸固定，不受状态栏按钮高度影响。
+    private static let recordingIcon: NSImage = {
+        let size = NSSize(width: 24, height: 20)
+        let image = NSImage(size: size, flipped: false) { rect in
+            NSColor.systemRed.withAlphaComponent(0.18).setFill()
+            NSBezierPath(roundedRect: rect, xRadius: 5, yRadius: 5).fill()
+
+            let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .regular)
+                .applying(.init(paletteColors: [.systemRed]))
+            guard let mic = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: nil)?
+                .withSymbolConfiguration(config) else { return true }
+            let origin = NSPoint(x: (rect.width - mic.size.width) / 2, y: (rect.height - mic.size.height) / 2)
+            mic.draw(in: NSRect(origin: origin, size: mic.size))
+            return true
+        }
+        image.isTemplate = false
+        image.accessibilityDescription = "正在录音"
+        return image
+    }()
+
     private func setRecordingIcon(_ recording: Bool) {
-        guard let button = statusItem.button else { return }
-        button.contentTintColor = recording ? .systemRed : nil
-
-        button.wantsLayer = true
-        guard let layer = button.layer else { return }
-        layer.cornerRadius = 5
-        layer.cornerCurve = .continuous
-
-        // 视图自带的 layer 默认不做隐式动画，这里显式加一个颜色渐变。
-        let target = recording ? NSColor.systemRed.withAlphaComponent(0.18).cgColor : NSColor.clear.cgColor
-        let fade = CABasicAnimation(keyPath: "backgroundColor")
-        fade.fromValue = layer.presentation()?.backgroundColor ?? layer.backgroundColor
-        fade.toValue = target
-        fade.duration = 0.2
-        fade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        layer.backgroundColor = target
-        layer.add(fade, forKey: "recordingBackdrop")
+        statusItem.button?.image = recording ? Self.recordingIcon : Self.idleIcon
     }
 
     /// 设置页每次运行只自动打开一次，避免用户每按一次快捷键就被弹一次窗口。
