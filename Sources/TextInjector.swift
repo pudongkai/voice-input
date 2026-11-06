@@ -58,7 +58,7 @@ enum TextInjector {
         pasteboard.writeObjects(objects)
     }
 
-    private static func postCommandV() {
+    static func postCommandV() {
         let source = CGEventSource(stateID: .hidSystemState)
         let keyCodeV: CGKeyCode = 0x09
 

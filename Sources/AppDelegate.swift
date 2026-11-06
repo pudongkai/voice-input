@@ -1,4 +1,5 @@
 import AVFoundation
+import Carbon
 import Cocoa
 import ServiceManagement
 import Speech
@@ -14,6 +15,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let menu = NSMenu()
     private let hud = HUD()
     private let hotkey = HotkeyMonitor()
+    private lazy var clipboardHistory = ClipboardHistory(capacity: Self.clampedHistorySize(config.clipboardHistorySize))
+    private lazy var clipboardPanel: ClipboardPanel = {
+        let panel = ClipboardPanel(history: clipboardHistory)
+        panel.onPick = { [weak self] entry in
+            self?.pasteFromHistory(entry, delay: 0.05)
+        }
+        return panel
+    }()
+    private var clipboardShortcut: GlobalShortcut?
 
     private var config = Config.load()
     private var session: SpeechSession?
@@ -32,7 +42,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusItem()
         setupHotkey()
-        hud.setOpacity(config.hudOpacity)
+        applyClipboardSettings()
+        applyOverlayOpacity(config.hudOpacity)
         enableLaunchAtLoginIfNeeded()
         rebuildMenu()
         requestInitialPermissions()
@@ -323,16 +334,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             menu.addItem(item)
         }
 
-        menu.addItem(.separator())
-        menu.addItem(permissionItem(title: "麦克风", granted: Permissions.microphoneGranted,
-                                    action: #selector(openMicrophoneSettings)))
-        menu.addItem(permissionItem(title: "语音识别", granted: Permissions.speechGranted,
-                                    action: #selector(openSpeechSettings)))
-        menu.addItem(permissionItem(title: "辅助功能", granted: Permissions.accessibilityGranted,
-                                    action: #selector(openAccessibilitySettings)))
-        menu.addItem(permissionItem(title: "听写", granted: Permissions.dictationEnabled,
-                                    action: #selector(openDictationSettings),
-                                    grantedText: "已开启", deniedText: "未开启"))
+        // 只列出还没授权或没开启的项，全部就绪时整组不显示。
+        let missing: [NSMenuItem] = [
+            Permissions.microphoneGranted ? nil
+                : missingPermissionItem("麦克风：未授权", action: #selector(openMicrophoneSettings)),
+            Permissions.speechGranted ? nil
+                : missingPermissionItem("语音识别：未授权", action: #selector(openSpeechSettings)),
+            Permissions.accessibilityGranted ? nil
+                : missingPermissionItem("辅助功能：未授权", action: #selector(openAccessibilitySettings)),
+            Permissions.dictationEnabled ? nil
+                : missingPermissionItem("听写：未开启", action: #selector(openDictationSettings)),
+        ].compactMap { $0 }
+        if !missing.isEmpty {
+            menu.addItem(.separator())
+            missing.forEach(menu.addItem)
+        }
 
         menu.addItem(.separator())
 
@@ -392,6 +408,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(opacityItem)
 
         menu.addItem(.separator())
+        menu.addItem(clipboardMenuItem())
+
+        menu.addItem(.separator())
         menu.addItem(actionItem(title: "打开配置文件", action: #selector(openConfig)))
         menu.addItem(actionItem(title: "重新加载配置", action: #selector(reloadConfig)))
 
@@ -414,22 +433,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(quit)
     }
 
-    private func permissionItem(
-        title: String,
-        granted: Bool,
-        action: Selector,
-        grantedText: String = "已授权",
-        deniedText: String = "未授权"
-    ) -> NSMenuItem {
-        let item = NSMenuItem(
-            title: "\(title)：\(granted ? grantedText : deniedText)",
-            action: action,
-            keyEquivalent: ""
-        )
+    private func missingPermissionItem(_ title: String, action: Selector) -> NSMenuItem {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
         item.target = self
-        // 用彩色圆点代替对勾，和下面的开关项区分开：绿色已授权，橙色未授权。
         item.state = .on
-        item.onStateImage = statusDot(granted ? .systemGreen : .systemOrange)
+        item.onStateImage = statusDot(.systemOrange)
         return item
     }
 
@@ -463,6 +471,155 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
         item.target = self
         return item
+    }
+
+    // MARK: - Clipboard history
+
+    private static let historySizeOptions = [10, 20, 50, 100]
+
+    private static func clampedHistorySize(_ size: Int) -> Int {
+        min(max(size, 1), 200)
+    }
+
+    private func applyClipboardSettings() {
+        clipboardHistory.capacity = Self.clampedHistorySize(config.clipboardHistorySize)
+        guard config.clipboardHistoryEnabled else {
+            clipboardHistory.stop()
+            clipboardHistory.clear()
+            clipboardShortcut = nil
+            return
+        }
+        clipboardHistory.start()
+        if clipboardShortcut == nil {
+            clipboardShortcut = GlobalShortcut(keyCode: kVK_ANSI_V, modifiers: cmdKey | shiftKey) { [weak self] in
+                self?.showClipboardPicker()
+            }
+        }
+    }
+
+    /// 录音悬浮窗和剪贴板面板共用一个透明度设置。
+    private func applyOverlayOpacity(_ value: Double) {
+        hud.setOpacity(value)
+        clipboardPanel.setOpacity(value)
+    }
+
+    private func showClipboardPicker() {
+        guard config.clipboardHistoryEnabled else { return }
+        clipboardPanel.present()
+    }
+
+    /// 写回剪贴板后模拟 ⌘V。从菜单里选时要等菜单收起、焦点回到原来的窗口。
+    private func pasteFromHistory(_ entry: ClipboardEntry, delay: TimeInterval) {
+        clipboardHistory.restore(entry)
+        guard Permissions.accessibilityGranted else {
+            showNotice("已复制到剪贴板", "授权辅助功能后可以直接粘贴，现在请按 ⌘V")
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            TextInjector.postCommandV()
+        }
+    }
+
+    private func clipboardMenuItem() -> NSMenuItem {
+        let item = NSMenuItem(title: "剪贴板历史", action: nil, keyEquivalent: "")
+        let submenu = NSMenu()
+        if config.clipboardHistoryEnabled {
+            addHistoryEntries(to: submenu)
+            submenu.addItem(.separator())
+            let open = actionItem(title: "打开历史列表", action: #selector(openClipboardPicker))
+            open.keyEquivalent = "v"
+            open.keyEquivalentModifierMask = [.command, .shift]
+            submenu.addItem(open)
+            submenu.addItem(actionItem(title: "清空历史", action: #selector(clearClipboardHistory)))
+            submenu.addItem(historySizeItem())
+            submenu.addItem(.separator())
+        }
+        submenu.addItem(toggleItem(title: "开启剪贴板历史", on: config.clipboardHistoryEnabled,
+                                   action: #selector(toggleClipboardHistory)))
+        item.submenu = submenu
+        return item
+    }
+
+    private func addHistoryEntries(to submenu: NSMenu) {
+        let entries = clipboardHistory.entries.prefix(10)
+        guard !entries.isEmpty else {
+            let empty = NSMenuItem(title: "还没有复制过内容", action: nil, keyEquivalent: "")
+            empty.isEnabled = false
+            submenu.addItem(empty)
+            return
+        }
+        for entry in entries {
+            let item = NSMenuItem(title: Self.menuTitle(for: entry), action: #selector(pasteHistoryItem(_:)),
+                                  keyEquivalent: "")
+            item.target = self
+            item.representedObject = entry.id
+            if case .image(_, let thumbnail, let pixelSize) = entry.content {
+                item.image = Self.menuIcon(from: thumbnail, pixelSize: pixelSize)
+            }
+            submenu.addItem(item)
+        }
+    }
+
+    private func historySizeItem() -> NSMenuItem {
+        let item = NSMenuItem(title: "记忆条数", action: nil, keyEquivalent: "")
+        let submenu = NSMenu()
+        let current = clipboardHistory.capacity
+        let options = Set(Self.historySizeOptions + [current]).sorted()
+        for size in options {
+            let option = NSMenuItem(title: "\(size) 条", action: #selector(setClipboardHistorySize(_:)),
+                                    keyEquivalent: "")
+            option.target = self
+            option.representedObject = size
+            option.state = size == current ? .on : .off
+            submenu.addItem(option)
+        }
+        item.submenu = submenu
+        return item
+    }
+
+    private static func menuTitle(for entry: ClipboardEntry) -> String {
+        switch entry.content {
+        case .text(let text):
+            let flat = text.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")
+            return flat.count > 30 ? String(flat.prefix(30)) + "…" : flat
+        case .image(_, _, let pixelSize):
+            return "图片 \(Int(pixelSize.width))×\(Int(pixelSize.height))"
+        }
+    }
+
+    private static func menuIcon(from thumbnail: NSImage, pixelSize: NSSize) -> NSImage? {
+        guard let icon = thumbnail.copy() as? NSImage else { return nil }
+        let aspect = pixelSize.height > 0 ? pixelSize.width / pixelSize.height : 1
+        icon.size = NSSize(width: min(32, 18 * aspect), height: 18)
+        return icon
+    }
+
+    @objc private func pasteHistoryItem(_ sender: NSMenuItem) {
+        guard let id = sender.representedObject as? UUID, let entry = clipboardHistory.entry(id: id) else { return }
+        pasteFromHistory(entry, delay: 0.25)
+    }
+
+    @objc private func openClipboardPicker() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+            self?.showClipboardPicker()
+        }
+    }
+
+    @objc private func clearClipboardHistory() {
+        clipboardHistory.clear()
+    }
+
+    @objc private func toggleClipboardHistory() {
+        config.clipboardHistoryEnabled.toggle()
+        config.save()
+        applyClipboardSettings()
+    }
+
+    @objc private func setClipboardHistorySize(_ sender: NSMenuItem) {
+        guard let size = sender.representedObject as? Int else { return }
+        config.clipboardHistorySize = size
+        config.save()
+        applyClipboardSettings()
     }
 
     // MARK: - Actions
@@ -556,7 +713,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let value = (sender.doubleValue * 100).rounded() / 100
         config.hudOpacity = value
         config.save()
-        hud.setOpacity(value)
+        applyOverlayOpacity(value)
 
         let percent = Int((value * 100).rounded())
         if let label = sender.superview?.viewWithTag(102) as? NSTextField {
@@ -574,7 +731,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func reloadConfig() {
         config = Config.load()
-        hud.setOpacity(config.hudOpacity)
+        applyOverlayOpacity(config.hudOpacity)
+        applyClipboardSettings()
         Log.write("config reloaded")
         if config.showHUD {
             hud.showInfo(title: "配置已重新加载", body: "", autoHide: 1.2)

@@ -52,6 +52,8 @@ build_arch() {
         -framework Speech \
         -framework ApplicationServices \
         -framework ServiceManagement \
+        -framework Carbon \
+        -framework SwiftUI \
         Sources/*.swift \
         -o "build/obj/VoiceInput-${arch}"
 }

@@ -63,6 +63,16 @@ cd voice-input
 悬浮窗外观可以在菜单栏里直接调：点菜单栏 🎤 →「悬浮窗透明度」，拖动滑块即可实时预览。
 范围 0.30 ~ 1.0，越小越透明；不需要重新编译。
 
+## 剪贴板历史
+
+自动记住最近复制过的文字和图片（包括 `⌃⌘⇧4` 截到剪贴板的截图），之后可以再选出来粘贴：
+
+- 按 `⇧⌘V`，在鼠标附近弹出历史列表：`↑` `↓` 选择，回车粘贴到当前窗口，数字键 `1`–`9` 直接粘贴对应的那条，`Esc` 关闭
+- 也可以点菜单栏 🎤 →「剪贴板历史」，点其中一条直接粘贴
+- 记几条在同一个子菜单的「记忆条数」里选（10 / 20 / 50 / 100），默认 20 条
+- 历史只保存在内存里，退出 App 后清空；密码管理器标记为“机密”的内容不会记录
+- 不需要的话，在子菜单里取消「开启剪贴板历史」，`⇧⌘V` 也会还给其他应用
+
 ## 配置
 
 配置文件：`~/.config/voice-input/config.json`（第一次启动自动生成）。
@@ -80,6 +90,8 @@ cd voice-input
   "showHUD": true,                // 底部悬浮提示
   "hudOpacity": 0.45,             // 悬浮窗蒙层不透明度，0.30 ~ 1.0，越小越透明
   "contextualStrings": ["插件", "终端"],
+  "clipboardHistoryEnabled": true,  // 剪贴板历史，⇧⌘V 打开
+  "clipboardHistorySize": 20,        // 记住最近几条，1 ~ 200
 }
 ```
 
@@ -144,6 +156,9 @@ Sources/
   HotkeyMonitor.swift  全局右 Option 按住/松开监听
   SpeechSession.swift  录音 + Apple 语音识别
   TextInjector.swift   剪贴板粘贴 / Unicode 键盘事件
+  ClipboardHistory.swift  剪贴板历史记录（文字、图片）
+  ClipboardPanel.swift    ⇧⌘V 弹出的历史选择面板
+  GlobalShortcut.swift    系统级快捷键注册
   HUD.swift            底部悬浮提示
   Config.swift         配置文件
   Permissions.swift    权限状态与授权
