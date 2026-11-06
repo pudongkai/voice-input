@@ -3,6 +3,8 @@
 按住 **右 Option（⌥）** 说话，松开后自动把语音转成文字并输入到当前终端窗口。
 对任何编辑器或聊天框都通用。
 
+官网：<https://pudongkai.github.io/voice-input/>
+
 - 原生 macOS 菜单栏 App，Swift 编写，无 Node / Python 依赖
 - 使用 Apple 系统语音识别，**免费、无需 API Key**
 - 默认优先使用**设备端识别**，语音不出本机
