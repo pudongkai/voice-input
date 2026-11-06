@@ -179,8 +179,8 @@ tools/
 
 `package.sh` 会生成：
 
-- `dist/VoiceInput-1.2.0.dmg`：App + Applications 快捷方式 + 中文安装说明
-- `dist/VoiceInput-1.2.0.zip`：只含 App，适合直接传文件
+- `dist/VoiceInput-1.2.1.dmg`：App + Applications 快捷方式 + 中文安装说明
+- `dist/VoiceInput-1.2.1.zip`：只含 App，适合直接传文件
 
 ### 发版
 
@@ -189,7 +189,8 @@ App 通过 GitHub Releases 检查更新，只认 `v1.2.0` 这种格式的标签�
 1. 改 `Resources/Info.plist`：`CFBundleShortVersionString` 改成新版本号，`CFBundleVersion`（构建号）加 1
 2. `./package.sh` 生成 `dist/VoiceInput-<版本>.dmg`
 3. 在 GitHub 新建发布，标签 `v<版本>`，上传安装包并**改名为 `VoiceInput.dmg`**，标记为 Latest
-4. 同时把 `latest` 标签那个发布里的 `VoiceInput.dmg` 换成新的（网站下载链接指向它）
+
+网站的下载链接是 `releases/latest/download/VoiceInput.dmg`，会自动指向最新发布里的同名文件，发版后不用改网站。
 
 App 启动 15 秒后和之后每 24 小时检查一次；菜单里有「检查更新…」和「自动检查更新」开关。
 点「更新到 vX」会下载安装包，在「应用程序」文件夹里运行时自动替换并重启；其他位置运行时只下载并打开 DMG。
