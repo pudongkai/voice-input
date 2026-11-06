@@ -3,46 +3,22 @@
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (id) => document.getElementById(id);
 
-  /* ---------- 背景粒子：缓慢漂移的点，近距离时连线 ---------- */
-  function initParticles() {
-    const canvas = $("particles");
-    const ctx = canvas.getContext("2d");
-    let w, h, dots;
-    const resize = () => {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      w = innerWidth; h = innerHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      canvas.style.width = w + "px"; canvas.style.height = h + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const count = Math.min(70, Math.floor((w * h) / 22000));
-      dots = Array.from({ length: count }, () => ({
-        x: Math.random() * w, y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
-        r: Math.random() * 1.4 + 0.4,
-      }));
-    };
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      for (const d of dots) {
-        d.x = (d.x + d.vx + w) % w; d.y = (d.y + d.vy + h) % h;
-        ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(80,140,230,0.35)"; ctx.fill();
+  /* ---------- 滚出屏幕或切到其他标签页时暂停动画和演示 ---------- */
+  const onScreen = new WeakSet();
+  const isActive = (el) => onScreen.has(el) && !document.hidden;
+  const waitUntilActive = async (el) => {
+    while (!isActive(el)) await sleep(400);
+  };
+
+  function initOffscreenPause() {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) onScreen.add(e.target);
+        else onScreen.delete(e.target);
+        e.target.classList.toggle("offscreen", !e.isIntersecting);
       }
-      for (let i = 0; i < dots.length; i++) {
-        for (let j = i + 1; j < dots.length; j++) {
-          const a = dots[i], b = dots[j];
-          const dist = Math.hypot(a.x - b.x, a.y - b.y);
-          if (dist < 130) {
-            ctx.strokeStyle = `rgba(80,140,230,${0.12 * (1 - dist / 130)})`;
-            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-          }
-        }
-      }
-      requestAnimationFrame(draw);
-    };
-    resize();
-    addEventListener("resize", resize);
-    if (!reduceMotion) draw();
+    });
+    document.querySelectorAll("[data-anim]").forEach((el) => io.observe(el));
   }
 
   /* ---------- 滚动进场 + 数字滚动 ---------- */
@@ -145,15 +121,12 @@
   }
 
   async function demoLoop() {
-    const demo = $("demo");
-    await new Promise((resolve) => {
-      const io = new IntersectionObserver((es) => {
-        if (es.some((e) => e.isIntersecting)) { io.disconnect(); resolve(); }
-      }, { threshold: 0.3 });
-      io.observe(demo);
-    });
+    const section = document.querySelector(".demo-section");
     for (;;) {
-      for (const s of SCRIPTS) await runOnce(s);
+      for (const s of SCRIPTS) {
+        await waitUntilActive(section);
+        await runOnce(s);
+      }
       await sleep(1200);
       $("bubbleOut").hidden = true;
       $("typed1").textContent = "";
@@ -206,12 +179,34 @@
     });
   }
 
-  initParticles();
+  /* ---------- 剪贴板历史演示：选中行自动移动，鼠标移上去时跟随鼠标 ---------- */
+  function initClipboardDemo() {
+    const rows = [...document.querySelectorAll("#clipList li")];
+    if (!rows.length) return;
+    let index = 0;
+    let hovering = false;
+    const select = (i) => {
+      index = i;
+      rows.forEach((row, n) => row.classList.toggle("on", n === i));
+    };
+    rows.forEach((row, n) => row.addEventListener("pointerenter", () => select(n)));
+    const list = $("clipList");
+    list.addEventListener("pointerenter", () => (hovering = true));
+    list.addEventListener("pointerleave", () => (hovering = false));
+    if (reduceMotion) return;
+    const section = $("clipboard");
+    setInterval(() => {
+      if (!hovering && isActive(section)) select((index + 1) % rows.length);
+    }, 1600);
+  }
+
+  initOffscreenPause();
   initReveal();
   initCardGlow();
   initClock();
   initOpacityDemo();
   initSegment();
   initCopy();
+  initClipboardDemo();
   demoLoop();
 })();
