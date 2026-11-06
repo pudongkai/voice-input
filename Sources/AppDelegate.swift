@@ -24,6 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         return panel
     }()
     private var clipboardShortcut: GlobalShortcut?
+    private let updater = UpdateController()
 
     private var config = Config.load()
     private var session: SpeechSession?
@@ -43,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         setupStatusItem()
         setupHotkey()
         applyClipboardSettings()
+        setupUpdater()
         applyOverlayOpacity(config.hudOpacity)
         enableLaunchAtLoginIfNeeded()
         rebuildMenu()
@@ -112,12 +114,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Permissions.requestMicrophone()
         Permissions.requestSpeech()
 
+        // 升级后签名会变，系统设置里旧版本留下的条目开关还开着却不生效，用户也删不掉。
+        // 每个构建号第一次启动且辅助功能未生效时，先在后台清掉旧条目，再让系统登记当前版本。
         let defaults = UserDefaults.standard
-        if !Permissions.accessibilityGranted, !defaults.bool(forKey: "didPromptAccessibility") {
-            defaults.set(true, forKey: "didPromptAccessibility")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                Permissions.promptAccessibility()
-            }
+        let key = "accessibilityPromptedBuild"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
+        guard !Permissions.accessibilityGranted, defaults.string(forKey: key) != build else { return }
+        defaults.set(build, forKey: key)
+        resetAccessibilityPermission()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            Permissions.promptAccessibility()
         }
     }
 
@@ -327,6 +333,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let status = NSMenuItem(title: statusText, action: nil, keyEquivalent: "")
         status.isEnabled = false
         menu.addItem(status)
+        if let updateItem = updater.statusMenuItem() {
+            menu.addItem(updateItem)
+        }
 
         if !lastTranscript.isEmpty {
             let item = NSMenuItem(title: "最近：\(lastTranscript.prefix(24))", action: nil, keyEquivalent: "")
@@ -427,6 +436,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let versionItem = NSMenuItem(title: "VoiceInput v\(appVersion)", action: nil, keyEquivalent: "")
         versionItem.isEnabled = false
         menu.addItem(versionItem)
+        menu.addItem(updater.checkNowMenuItem())
+        menu.addItem(toggleItem(title: "自动检查更新", on: config.autoCheckUpdates,
+                                action: #selector(toggleAutoCheckUpdates)))
 
         let quit = NSMenuItem(title: "退出 VoiceInput", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         quit.target = NSApp
@@ -603,6 +615,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
             self?.showClipboardPicker()
         }
+    }
+
+    private func setupUpdater() {
+        updater.isAutoCheckEnabled = { [weak self] in
+            self?.config.autoCheckUpdates ?? false
+        }
+        updater.notify = { [weak self] title, body, duration in
+            self?.showNotice(title, body, duration: duration)
+        }
+        updater.start()
+    }
+
+    @objc private func toggleAutoCheckUpdates() {
+        config.autoCheckUpdates.toggle()
+        config.save()
     }
 
     @objc private func clearClipboardHistory() {

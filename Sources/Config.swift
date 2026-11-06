@@ -14,6 +14,7 @@ struct Config: Codable {
     var contextualStrings: [String]
     var clipboardHistoryEnabled: Bool
     var clipboardHistorySize: Int
+    var autoCheckUpdates: Bool
 
     init() {
         locale = "zh-CN"
@@ -28,6 +29,7 @@ struct Config: Codable {
         hudOpacity = 0.45
         clipboardHistoryEnabled = true
         clipboardHistorySize = 20
+        autoCheckUpdates = true
         contextualStrings = [
             "OpenCode", "Claude Code", "Claude", "GitHub", "API", "CLI",
             "commit", "pull request", "bug", "refactor", "plugin", "terminal",
@@ -39,7 +41,7 @@ struct Config: Codable {
         case locale, hotkey, insertMethod, restoreClipboard, onDeviceRecognition
         case maxRecordingSeconds, minHoldSeconds, playFeedbackSound, showHUD
         case hudOpacity, contextualStrings
-        case clipboardHistoryEnabled, clipboardHistorySize
+        case clipboardHistoryEnabled, clipboardHistorySize, autoCheckUpdates
     }
 
     init(from decoder: Decoder) throws {
@@ -59,6 +61,7 @@ struct Config: Codable {
         clipboardHistoryEnabled = try c.decodeIfPresent(Bool.self, forKey: .clipboardHistoryEnabled)
             ?? d.clipboardHistoryEnabled
         clipboardHistorySize = try c.decodeIfPresent(Int.self, forKey: .clipboardHistorySize) ?? d.clipboardHistorySize
+        autoCheckUpdates = try c.decodeIfPresent(Bool.self, forKey: .autoCheckUpdates) ?? d.autoCheckUpdates
     }
 
     static var directory: URL {

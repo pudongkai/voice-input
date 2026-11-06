@@ -9,7 +9,7 @@
   <meta property="og:description" content="原生 macOS 语音输入。免费、无需 API Key，语音不出本机。" />
   <meta property="og:image" content="assets/icon.png" />
   <meta name="theme-color" content="#f6f9fe" />
-  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="icon" type="image/png" href="assets/favicon.png?v=2" />
   <link rel="apple-touch-icon" href="assets/icon.png" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -36,7 +36,7 @@
       <a href="#faq">常见问题</a>
       <a href="#donate">打赏</a>
     </div>
-    <a class="btn btn-sm btn-primary" href="#download">免费下载</a>
+    <a class="btn btn-sm btn-primary btn-glow" href="#download">免费下载</a>
   </nav>
 
   <!-- 首屏 -->
@@ -44,7 +44,7 @@
     <div class="hero-copy">
       <div class="pill reveal">
         <span class="pill-dot"></span>
-        v1.1.6 · macOS 原生 · Apple Silicon &amp; Intel
+        v1.2.0 · macOS 原生 · Apple Silicon &amp; Intel
       </div>
       <h1 class="reveal">
         按住 <kbd class="kbd-hero">⌥</kbd>，<br />
@@ -369,7 +369,7 @@
             <hr />
             <div class="mm-item"><i>✓</i>开机启动</div>
             <hr />
-            <div class="mm-item dis">VoiceInput v1.1.6</div>
+            <div class="mm-item dis">VoiceInput v1.2.0</div>
             <div class="mm-item">退出 VoiceInput<span class="sc">⌘Q</span></div>
           </div>
         </div>
@@ -582,6 +582,13 @@
         <div>
           <p>第一次从「应用程序」里打开后，它会自动设置为开机启动，这样随时都能用。</p>
           <p>不想要的话，点屏幕右上角的麦克风图标，再点一下菜单里的「开机启动」，前面的勾消失就关掉了。</p>
+        </div>
+      </details>
+      <details class="card reveal">
+        <summary>怎么升级到新版本？</summary>
+        <div>
+          <p>VoiceInput 会自动检查新版本。有新版时，点屏幕右上角的麦克风图标，菜单最上面会出现「更新到 v…」，点一下就会自动下载、安装并重新打开，不用自己拖拽。</p>
+          <p>更新完成后，记得到「系统设置」→「隐私与安全性」→「辅助功能」里重新打开 VoiceInput 的开关。也可以随时点菜单里的「检查更新…」手动检查。</p>
         </div>
       </details>
       <details class="card reveal">

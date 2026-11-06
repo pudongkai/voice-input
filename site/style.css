@@ -65,9 +65,19 @@ img { display: block; }
 }
 .btn:hover { transform: translateY(-2px); }
 .btn-sm { padding: 0.5em 1.15em; font-size: 0.88rem; }
-.btn-primary { background: linear-gradient(135deg, #3b7bf6, #4fb3ff); color: #fff; }
-.btn-glow { box-shadow: 0 10px 28px -10px rgba(59, 123, 246, 0.65); }
-.btn-glow:hover { box-shadow: 0 14px 34px -10px rgba(59, 123, 246, 0.8); }
+/* 配色与 App 图标一致：蓝→青斜向渐变、上半部高光 */
+.btn-primary {
+  --btn-edge: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(135deg, #3b6cf0, #37c6b0);
+  background-origin: border-box;
+  color: #fff; box-shadow: var(--btn-edge);
+}
+.btn-glow { box-shadow: var(--btn-edge), 0 10px 28px -10px rgba(48, 120, 220, 0.65); }
+.btn-glow:hover { box-shadow: var(--btn-edge), 0 14px 34px -10px rgba(48, 150, 200, 0.8); }
+.btn-sm.btn-glow { box-shadow: var(--btn-edge), 0 6px 16px -6px rgba(48, 120, 220, 0.6); }
+.btn-sm.btn-glow:hover { box-shadow: var(--btn-edge), 0 9px 20px -6px rgba(48, 150, 200, 0.75); }
 .btn-ghost { border-color: var(--line-strong); color: var(--text); background: rgba(255, 255, 255, 0.7); }
 .btn-ghost:hover { background: #fff; }
 
