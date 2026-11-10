@@ -55,8 +55,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             guard let self, self.config.showHUD else { return }
             self.hud.showInfo(
-                title: "语音输入已就绪",
-                body: "按住右 Option 说话，松开自动输入到当前窗口",
+                title: L("语音输入已就绪", "Voice input is ready"),
+                body: L("按住右 Option 说话，松开自动输入到当前窗口", "Hold Right Option to speak; release to type into the current window"),
                 autoHide: 3.0
             )
         }
@@ -72,7 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
             button.image = Self.idleIcon
-            button.toolTip = "VoiceInput \(appVersion)：按住右 Option 说话"
+            button.toolTip = "VoiceInput \(appVersion)" + L("：按住右 Option 说话", ": hold Right Option to speak")
         }
         menu.delegate = self
         statusItem.menu = menu
@@ -104,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self.hotkey.stop()
             self.hotkey.start()
             if trusted {
-                self.showNotice("辅助功能已授权", "现在可以按住右 Option 说话了")
+                self.showNotice(L("辅助功能已授权", "Accessibility granted"), L("现在可以按住右 Option 说话了", "You can now hold Right Option to speak"))
             }
         }
     }
@@ -133,17 +133,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         guard Permissions.microphoneGranted else {
             Permissions.requestMicrophone()
-            showNotice("需要麦克风权限", "请在系统设置中允许「VoiceInput」使用麦克风，然后重试")
+            showNotice(L("需要麦克风权限", "Microphone access needed"), L("请在系统设置中允许「VoiceInput」使用麦克风，然后重试", "Allow VoiceInput to use the microphone in System Settings, then try again"))
             return
         }
         guard Permissions.speechGranted else {
             Permissions.requestSpeech()
-            showNotice("需要语音识别权限", "请在系统设置中允许「VoiceInput」使用语音识别，然后重试")
+            showNotice(L("需要语音识别权限", "Speech recognition access needed"), L("请在系统设置中允许「VoiceInput」使用语音识别，然后重试", "Allow VoiceInput to use speech recognition in System Settings, then try again"))
             return
         }
         guard Permissions.accessibilityGranted else {
             Permissions.promptAccessibility()
-            showNotice("需要辅助功能权限", "请在系统设置中授权，否则无法监听快捷键和输入文字")
+            showNotice(L("需要辅助功能权限", "Accessibility access needed"), L("请在系统设置中授权，否则无法监听快捷键和输入文字", "Grant access in System Settings; otherwise the hotkey and text input won't work"))
             return
         }
 
@@ -229,8 +229,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 Log.write("session empty")
                 if config.showHUD {
                     hud.showInfo(
-                        title: "没听清",
-                        body: "没有识别到内容，请靠近麦克风再说一次",
+                        title: L("没听清", "Didn't catch that"),
+                        body: L("没有识别到内容，请靠近麦克风再说一次", "Nothing was recognized. Move closer to the mic and try again."),
                         autoHide: 2.2
                     )
                 }
@@ -255,14 +255,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 handleDictationDisabled()
                 return
             }
-            notify("识别失败：\(message)")
+            notify(L("识别失败：", "Recognition failed: ") + message)
         }
     }
 
     // MARK: - UI helpers
 
     private static let idleIcon: NSImage? = {
-        let image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: "语音输入")
+        let image = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: L("语音输入", "Voice input"))
         image?.isTemplate = true
         return image
     }()
@@ -284,7 +284,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return true
         }
         image.isTemplate = false
-        image.accessibilityDescription = "正在录音"
+        image.accessibilityDescription = L("正在录音", "Recording")
         return image
     }()
 
@@ -294,7 +294,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     /// 设置页每次运行只自动打开一次，避免用户每按一次快捷键就被弹一次窗口。
     private func handleDictationDisabled() {
-        notify("请先打开系统「听写」：系统设置 → 键盘 → 听写")
+        notify(L("请先打开系统「听写」：系统设置 → 键盘 → 听写", "Turn on Dictation first: System Settings → Keyboard → Dictation"))
         guard !openedDictationSettings else { return }
         openedDictationSettings = true
         Permissions.openDictationSettings()
@@ -335,9 +335,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         let statusText: String
         switch state {
-        case .idle: statusText = "就绪 · 按住右 Option 说话"
-        case .recording: statusText = "录音中…"
-        case .processing: statusText = "识别中…"
+        case .idle: statusText = L("就绪 · 按住右 Option 说话", "Ready · Hold Right Option to speak")
+        case .recording: statusText = L("录音中…", "Recording…")
+        case .processing: statusText = L("识别中…", "Recognizing…")
         }
         let status = NSMenuItem(title: statusText, action: nil, keyEquivalent: "")
         status.isEnabled = false
@@ -347,7 +347,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if !lastTranscript.isEmpty {
-            let item = NSMenuItem(title: "最近：\(lastTranscript.prefix(24))", action: nil, keyEquivalent: "")
+            let item = NSMenuItem(title: L("最近：", "Latest: ") + lastTranscript.prefix(24), action: nil, keyEquivalent: "")
             item.isEnabled = false
             menu.addItem(item)
         }
@@ -355,13 +355,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // 只列出还没授权或没开启的项，全部就绪时整组不显示。
         let missing: [NSMenuItem] = [
             Permissions.microphoneGranted ? nil
-                : missingPermissionItem("麦克风：未授权", action: #selector(openMicrophoneSettings)),
+                : missingPermissionItem(L("麦克风：未授权", "Microphone: not allowed"), action: #selector(openMicrophoneSettings)),
             Permissions.speechGranted ? nil
-                : missingPermissionItem("语音识别：未授权", action: #selector(openSpeechSettings)),
+                : missingPermissionItem(L("语音识别：未授权", "Speech Recognition: not allowed"), action: #selector(openSpeechSettings)),
             Permissions.accessibilityGranted ? nil
-                : missingPermissionItem("辅助功能：未授权", action: #selector(openAccessibilitySettings)),
+                : missingPermissionItem(L("辅助功能：未授权", "Accessibility: not allowed"), action: #selector(openAccessibilitySettings)),
             Permissions.dictationEnabled ? nil
-                : missingPermissionItem("听写：未开启", action: #selector(openDictationSettings)),
+                : missingPermissionItem(L("听写：未开启", "Dictation: off"), action: #selector(openDictationSettings)),
         ].compactMap { $0 }
         if !missing.isEmpty {
             menu.addItem(.separator())
@@ -370,33 +370,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let insertItem = NSMenuItem(title: "输入方式", action: nil, keyEquivalent: "")
+        let insertItem = NSMenuItem(title: L("输入方式", "Input Method"), action: nil, keyEquivalent: "")
         let insertMenu = NSMenu()
-        insertMenu.addItem(methodItem(title: "模拟键盘输入", value: "type"))
-        insertMenu.addItem(methodItem(title: "粘贴（同时复制到剪贴板）", value: "paste"))
+        insertMenu.addItem(methodItem(title: L("模拟键盘输入", "Simulate Typing"), value: "type"))
+        insertMenu.addItem(methodItem(title: L("粘贴（同时复制到剪贴板）", "Paste (also copies to clipboard)"), value: "paste"))
         insertItem.submenu = insertMenu
         menu.addItem(insertItem)
 
         let onDeviceTitle: String
         if config.onDeviceRecognition && !onDeviceAvailable {
-            onDeviceTitle = "设备端识别（语言包未下载）"
+            onDeviceTitle = L("设备端识别（语言包未下载）", "On-Device Recognition (language pack not downloaded)")
         } else {
-            onDeviceTitle = "设备端识别"
+            onDeviceTitle = L("设备端识别", "On-Device Recognition")
         }
         menu.addItem(toggleItem(title: onDeviceTitle, on: config.onDeviceRecognition,
                                 action: #selector(toggleOnDevice)))
-        menu.addItem(toggleItem(title: "播放提示音", on: config.playFeedbackSound,
+        menu.addItem(toggleItem(title: L("播放提示音", "Play Sounds"), on: config.playFeedbackSound,
                                 action: #selector(toggleSound)))
-        menu.addItem(toggleItem(title: "显示悬浮提示", on: config.showHUD,
+        menu.addItem(toggleItem(title: L("显示悬浮提示", "Show Floating HUD"), on: config.showHUD,
                                 action: #selector(toggleHUD)))
 
-        let opacityItem = NSMenuItem(title: "悬浮窗透明度", action: nil, keyEquivalent: "")
+        let opacityItem = NSMenuItem(title: L("悬浮窗透明度", "HUD Opacity"), action: nil, keyEquivalent: "")
         let rowWidth: CGFloat = 300
         let opacityView = NSView(frame: NSRect(x: 0, y: 0, width: rowWidth, height: 24))
         opacityView.autoresizingMask = [.width]
 
         let percent = Int((config.hudOpacity * 100).rounded())
-        let opacityLabel = NSTextField(labelWithString: "悬浮窗透明度")
+        let opacityLabel = NSTextField(labelWithString: L("悬浮窗透明度", "HUD Opacity"))
         opacityLabel.font = .menuFont(ofSize: 0)
         opacityLabel.textColor = .labelColor
         opacityLabel.frame = NSRect(x: 22, y: 4, width: 85, height: 16)
@@ -429,14 +429,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(clipboardMenuItem())
 
         menu.addItem(.separator())
-        menu.addItem(actionItem(title: "打开配置文件", action: #selector(openConfig)))
-        menu.addItem(actionItem(title: "重新加载配置", action: #selector(reloadConfig)))
+        menu.addItem(actionItem(title: L("打开配置文件", "Open Config File"), action: #selector(openConfig)))
+        menu.addItem(actionItem(title: L("重新加载配置", "Reload Config"), action: #selector(reloadConfig)))
 
         let loginStatus = SMAppService.mainApp.status
         let loginTitle: String
         switch loginStatus {
-        case .requiresApproval: loginTitle = "开机启动（需在系统设置中批准）"
-        default: loginTitle = "开机启动"
+        case .requiresApproval: loginTitle = L("开机启动（需在系统设置中批准）", "Launch at Login (approve in System Settings)")
+        default: loginTitle = L("开机启动", "Launch at Login")
         }
         menu.addItem(toggleItem(title: loginTitle, on: loginStatus == .enabled,
                                 action: #selector(toggleLaunchAtLogin)))
@@ -446,10 +446,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         versionItem.isEnabled = false
         menu.addItem(versionItem)
         menu.addItem(updater.checkNowMenuItem())
-        menu.addItem(toggleItem(title: "自动检查更新", on: config.autoCheckUpdates,
+        menu.addItem(toggleItem(title: L("自动检查更新", "Check for Updates Automatically"), on: config.autoCheckUpdates,
                                 action: #selector(toggleAutoCheckUpdates)))
 
-        let quit = NSMenuItem(title: "退出 VoiceInput", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let quit = NSMenuItem(title: L("退出 VoiceInput", "Quit VoiceInput"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         quit.target = NSApp
         menu.addItem(quit)
     }
@@ -533,7 +533,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func pasteFromHistory(_ entry: ClipboardEntry, delay: TimeInterval) {
         clipboardHistory.restore(entry)
         guard Permissions.accessibilityGranted else {
-            showNotice("已复制到剪贴板", "授权辅助功能后可以直接粘贴，现在请按 ⌘V")
+            showNotice(L("已复制到剪贴板", "Copied to clipboard"), L("授权辅助功能后可以直接粘贴，现在请按 ⌘V", "Grant Accessibility to paste directly. For now, press ⌘V."))
             return
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -542,20 +542,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func clipboardMenuItem() -> NSMenuItem {
-        let item = NSMenuItem(title: "剪贴板历史", action: nil, keyEquivalent: "")
+        let item = NSMenuItem(title: L("剪贴板历史", "Clipboard History"), action: nil, keyEquivalent: "")
         let submenu = NSMenu()
         if config.clipboardHistoryEnabled {
             addHistoryEntries(to: submenu)
             submenu.addItem(.separator())
-            let open = actionItem(title: "打开历史列表", action: #selector(openClipboardPicker))
+            let open = actionItem(title: L("打开历史列表", "Open History List"), action: #selector(openClipboardPicker))
             open.keyEquivalent = "v"
             open.keyEquivalentModifierMask = [.command, .shift]
             submenu.addItem(open)
-            submenu.addItem(actionItem(title: "清空历史", action: #selector(clearClipboardHistory)))
+            submenu.addItem(actionItem(title: L("清空历史", "Clear History"), action: #selector(clearClipboardHistory)))
             submenu.addItem(historySizeItem())
             submenu.addItem(.separator())
         }
-        submenu.addItem(toggleItem(title: "开启剪贴板历史", on: config.clipboardHistoryEnabled,
+        submenu.addItem(toggleItem(title: L("开启剪贴板历史", "Enable Clipboard History"), on: config.clipboardHistoryEnabled,
                                    action: #selector(toggleClipboardHistory)))
         item.submenu = submenu
         return item
@@ -564,7 +564,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func addHistoryEntries(to submenu: NSMenu) {
         let entries = clipboardHistory.entries.prefix(10)
         guard !entries.isEmpty else {
-            let empty = NSMenuItem(title: "还没有复制过内容", action: nil, keyEquivalent: "")
+            let empty = NSMenuItem(title: L("还没有复制过内容", "Nothing copied yet"), action: nil, keyEquivalent: "")
             empty.isEnabled = false
             submenu.addItem(empty)
             return
@@ -582,12 +582,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func historySizeItem() -> NSMenuItem {
-        let item = NSMenuItem(title: "记忆条数", action: nil, keyEquivalent: "")
+        let item = NSMenuItem(title: L("记忆条数", "History Size"), action: nil, keyEquivalent: "")
         let submenu = NSMenu()
         let current = clipboardHistory.capacity
         let options = Set(Self.historySizeOptions + [current]).sorted()
         for size in options {
-            let option = NSMenuItem(title: "\(size) 条", action: #selector(setClipboardHistorySize(_:)),
+            let option = NSMenuItem(title: L("\(size) 条", "\(size) items"), action: #selector(setClipboardHistorySize(_:)),
                                     keyEquivalent: "")
             option.target = self
             option.representedObject = size
@@ -604,7 +604,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let flat = text.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")
             return flat.count > 30 ? String(flat.prefix(30)) + "…" : flat
         case .image(_, _, let pixelSize):
-            return "图片 \(Int(pixelSize.width))×\(Int(pixelSize.height))"
+            return L("图片", "Image") + " \(Int(pixelSize.width))×\(Int(pixelSize.height))"
         }
     }
 
@@ -699,7 +699,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             Permissions.openAccessibilitySettings()
-            self?.showNotice("打开 VoiceInput 的开关", "列表里没有的话，点下方「+」从「应用程序」添加 VoiceInput",
+            self?.showNotice(L("打开 VoiceInput 的开关", "Turn on the switch for VoiceInput"), L("列表里没有的话，点下方「+」从「应用程序」添加 VoiceInput", "If it isn't listed, click \"+\" below and add VoiceInput from Applications"),
                             duration: 10)
         }
     }
@@ -729,8 +729,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         config.save()
         if config.onDeviceRecognition && !onDeviceAvailable {
             showAlert(
-                "设备端语言包未下载",
-                "当前语言（\(config.locale)）还不能在本机识别，会先使用 Apple 在线识别。\n\n要启用设备端识别：打开 系统设置 → 键盘 → 听写，开启听写并添加中文，等待语言包下载完成后，再重新勾选本项。"
+                L("设备端语言包未下载", "On-device language pack not downloaded"),
+                L("当前语言（\(config.locale)）还不能在本机识别，会先使用 Apple 在线识别。\n\n要启用设备端识别：打开 系统设置 → 键盘 → 听写，开启听写并添加中文，等待语言包下载完成后，再重新勾选本项。",
+                  "The current language (\(config.locale)) can't be recognized on this Mac yet, so Apple's online recognition will be used for now.\n\nTo enable on-device recognition: open System Settings → Keyboard → Dictation, turn on Dictation and add this language, wait for the language pack to download, then check this option again.")
             )
         }
     }
@@ -756,7 +757,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             label.stringValue = "\(percent)%"
         }
         if config.showHUD {
-            hud.showInfo(title: "悬浮窗透明度 \(percent)%", body: "拖动滑块查看效果", autoHide: 0.9)
+            hud.showInfo(title: L("悬浮窗透明度 \(percent)%", "HUD Opacity \(percent)%"), body: L("拖动滑块查看效果", "Drag the slider to preview"), autoHide: 0.9)
         }
     }
 
@@ -771,7 +772,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         applyClipboardSettings()
         Log.write("config reloaded")
         if config.showHUD {
-            hud.showInfo(title: "配置已重新加载", body: "", autoHide: 1.2)
+            hud.showInfo(title: L("配置已重新加载", "Config reloaded"), body: "", autoHide: 1.2)
         }
     }
 
@@ -805,7 +806,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 try SMAppService.mainApp.register()
             }
         } catch {
-            showAlert("设置开机启动失败", error.localizedDescription)
+            showAlert(L("设置开机启动失败", "Failed to set Launch at Login"), error.localizedDescription)
         }
     }
 }

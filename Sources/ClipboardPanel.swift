@@ -159,9 +159,9 @@ private struct ClipboardListView: View {
         HStack(spacing: 8) {
             Image(systemName: "doc.on.clipboard")
                 .foregroundColor(Color(red: 0.32, green: 0.64, blue: 1.0))
-            Text("剪贴板历史").font(.system(size: 13, weight: .semibold))
+            Text(L("剪贴板历史", "Clipboard History")).font(.system(size: 13, weight: .semibold))
             Spacer()
-            Text("\(history.entries.count) 条").font(.system(size: 11)).foregroundColor(.secondary)
+            Text(L("\(history.entries.count) 条", "\(history.entries.count) items")).font(.system(size: 11)).foregroundColor(.secondary)
         }
         .padding(.horizontal, 14)
         .frame(height: 40)
@@ -196,18 +196,18 @@ private struct ClipboardListView: View {
     private var emptyState: some View {
         VStack(spacing: 6) {
             Image(systemName: "tray").font(.system(size: 22)).foregroundColor(.secondary)
-            Text("还没有复制过内容").font(.system(size: 12)).foregroundColor(.secondary)
+            Text(L("还没有复制过内容", "Nothing copied yet")).font(.system(size: 12)).foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var footer: some View {
         HStack(spacing: 14) {
-            KeyHint(keys: "↑↓", label: "选择")
-            KeyHint(keys: "↩", label: "粘贴")
-            KeyHint(keys: "1-9", label: "快速粘贴")
+            KeyHint(keys: "↑↓", label: L("选择", "Select"))
+            KeyHint(keys: "↩", label: L("粘贴", "Paste"))
+            KeyHint(keys: "1-9", label: L("快速粘贴", "Quick paste"))
             Spacer()
-            KeyHint(keys: "esc", label: "关闭")
+            KeyHint(keys: "esc", label: L("关闭", "Close"))
         }
         .padding(.horizontal, 14)
         .frame(height: 30)
@@ -255,7 +255,7 @@ private struct ClipboardRow: View {
                     .frame(width: 52, height: 38)
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.white.opacity(0.15)))
-                Text(verbatim: "图片  \(Int(pixelSize.width))×\(Int(pixelSize.height))")
+                Text(verbatim: L("图片", "Image") + "  \(Int(pixelSize.width))×\(Int(pixelSize.height))")
                     .font(.system(size: 12))
                     .foregroundColor(.white.opacity(0.85))
             }
@@ -269,10 +269,10 @@ private struct ClipboardRow: View {
 
     private static func relativeTime(_ date: Date) -> String {
         let seconds = Int(Date().timeIntervalSince(date))
-        if seconds < 60 { return "刚刚" }
-        if seconds < 3600 { return "\(seconds / 60) 分钟前" }
-        if seconds < 86400 { return "\(seconds / 3600) 小时前" }
-        return "\(seconds / 86400) 天前"
+        if seconds < 60 { return L("刚刚", "just now") }
+        if seconds < 3600 { return L("\(seconds / 60) 分钟前", "\(seconds / 60) min ago") }
+        if seconds < 86400 { return L("\(seconds / 3600) 小时前", "\(seconds / 3600) h ago") }
+        return L("\(seconds / 86400) 天前", "\(seconds / 86400) d ago")
     }
 }
 

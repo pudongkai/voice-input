@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "需要麦克风权限来录制你的语音并转换成文字。";
+"NSSpeechRecognitionUsageDescription" = "需要语音识别权限来把录音转换成文字。";

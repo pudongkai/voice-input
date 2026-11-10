@@ -125,8 +125,8 @@ final class HUD {
     func showListening() {
         show(
             icon: "waveform",
-            title: "正在聆听…",
-            body: "松开右 Option 结束",
+            title: L("正在聆听…", "Listening…"),
+            body: L("松开右 Option 结束", "Release Right Option to finish"),
             accent: accentListening,
             autoHide: nil
         )
@@ -135,13 +135,13 @@ final class HUD {
     func updatePartial(_ text: String) {
         guard !text.isEmpty else { return }
         bodyLabel.stringValue = text
-        titleLabel.stringValue = "正在聆听…"
+        titleLabel.stringValue = L("正在聆听…", "Listening…")
     }
 
     func showProcessing() {
         show(
             icon: "ellipsis.circle",
-            title: "识别中…",
+            title: L("识别中…", "Recognizing…"),
             body: bodyLabel.stringValue,
             accent: accentProcessing,
             autoHide: nil
@@ -151,7 +151,7 @@ final class HUD {
     func showInjected(_ text: String) {
         show(
             icon: "checkmark.circle.fill",
-            title: "已输入",
+            title: L("已输入", "Inserted"),
             body: text,
             accent: accentSuccess,
             autoHide: 0.9
@@ -161,7 +161,7 @@ final class HUD {
     func showError(_ message: String) {
         show(
             icon: "exclamationmark.triangle.fill",
-            title: "出错了",
+            title: L("出错了", "Something went wrong"),
             body: message,
             accent: accentError,
             autoHide: 2.4

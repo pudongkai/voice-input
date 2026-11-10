@@ -25,13 +25,13 @@ final class SpeechSession {
 
     func start() throws {
         guard Permissions.speechGranted else {
-            throw VoiceError.message("没有语音识别权限，请在系统设置中授权后重试")
+            throw VoiceError.message(L("没有语音识别权限，请在系统设置中授权后重试", "Speech recognition is not allowed. Grant access in System Settings and try again."))
         }
         guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: config.locale)) else {
-            throw VoiceError.message("系统不支持语言 \(config.locale)")
+            throw VoiceError.message(L("系统不支持语言 \(config.locale)", "Language \(config.locale) is not supported by the system"))
         }
         guard recognizer.isAvailable else {
-            throw VoiceError.message("语音识别服务暂不可用，请稍后再试")
+            throw VoiceError.message(L("语音识别服务暂不可用，请稍后再试", "Speech recognition is unavailable right now. Please try again later."))
         }
         self.recognizer = recognizer
 
@@ -50,7 +50,7 @@ final class SpeechSession {
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else {
-            throw VoiceError.message("无法访问麦克风，请检查系统权限和输入设备")
+            throw VoiceError.message(L("无法访问麦克风，请检查系统权限和输入设备", "Can't access the microphone. Check permissions and the input device."))
         }
 
         input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak request] buffer, _ in
@@ -63,7 +63,7 @@ final class SpeechSession {
             try engine.start()
         } catch {
             removeTapIfNeeded()
-            throw VoiceError.message("启动录音失败：\(error.localizedDescription)")
+            throw VoiceError.message(L("启动录音失败：", "Failed to start recording: ") + error.localizedDescription)
         }
 
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
