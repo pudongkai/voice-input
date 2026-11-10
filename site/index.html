@@ -3,10 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VoiceInput — 按住 ⌥，说出来就是文字</title>
-  <meta name="description" content="VoiceInput 是一款原生 macOS 菜单栏语音输入工具。按住右 Option 说话，松开即输入到任意编辑器、终端和聊天框。免费、无需 API Key，默认本机识别，还能记住剪贴板历史。" />
-  <meta property="og:title" content="VoiceInput — 按住 ⌥，说出来就是文字" />
-  <meta property="og:description" content="原生 macOS 语音输入。免费、无需 API Key，语音不出本机。" />
+  <script>
+    /* 尽早确定页面语言：手动选择优先，否则按浏览器首选语言，zh 开头用中文，其余用英文。
+       英文时先隐藏页面，等 i18n.js 替换完文案再显示，避免先闪一下中文；超时兜底防止脚本加载失败时页面一直空白。 */
+    (function () {
+      var d = document.documentElement, l;
+      try { l = localStorage.getItem("lang"); } catch (e) {}
+      if (l !== "zh" && l !== "en") {
+        var n = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+        l = /^zh/i.test(n) ? "zh" : "en";
+      }
+      d.lang = l === "zh" ? "zh-CN" : "en";
+      if (l === "en") {
+        d.classList.add("i18n-pending");
+        setTimeout(function () { d.classList.remove("i18n-pending"); }, 3000);
+      }
+    })();
+  </script>
+  <title data-i18n="meta.title">VoiceInput — 按住 ⌥，说出来就是文字</title>
+  <meta name="description" data-i18n-attr="content:meta.desc" content="VoiceInput 是一款原生 macOS 菜单栏语音输入工具。按住右 Option 说话，松开即输入到任意编辑器、终端和聊天框。免费、无需 API Key，默认本机识别，还能记住剪贴板历史。" />
+  <meta property="og:title" data-i18n-attr="content:meta.title" content="VoiceInput — 按住 ⌥，说出来就是文字" />
+  <meta property="og:description" data-i18n-attr="content:meta.ogDesc" content="原生 macOS 语音输入。免费、无需 API Key，语音不出本机。" />
   <meta property="og:image" content="https://pudongkai.github.io/voice-input/assets/icon.png" />
   <meta property="og:url" content="https://pudongkai.github.io/voice-input/" />
   <link rel="canonical" href="https://pudongkai.github.io/voice-input/" />
@@ -31,15 +48,21 @@
       <span>VoiceInput</span>
     </a>
     <div class="nav-links">
-      <a href="#how">工作方式</a>
-      <a href="#features">特性</a>
-      <a href="#clipboard">剪贴板</a>
-      <a href="#gallery">界面</a>
-      <a href="#install">安装</a>
-      <a href="#faq">常见问题</a>
-      <a href="#donate">打赏</a>
+      <a href="#how" data-i18n="nav.how">工作方式</a>
+      <a href="#features" data-i18n="nav.features">特性</a>
+      <a href="#clipboard" data-i18n="nav.clipboard">剪贴板</a>
+      <a href="#gallery" data-i18n="nav.gallery">界面</a>
+      <a href="#install" data-i18n="nav.install">安装</a>
+      <a href="#faq" data-i18n="nav.faq">常见问题</a>
+      <a href="#donate" data-i18n="nav.donate">打赏</a>
     </div>
-    <a class="btn btn-sm btn-primary btn-glow" href="#download">免费下载</a>
+    <div class="nav-actions">
+      <div class="lang-toggle" role="group" aria-label="Language / 语言">
+        <button type="button" data-lang="zh" lang="zh-CN" aria-pressed="false">中文</button>
+        <button type="button" data-lang="en" lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="btn btn-sm btn-primary btn-glow" href="#download" data-i18n="nav.download">免费下载</a>
+    </div>
   </nav>
 
   <!-- 首屏 -->
@@ -47,30 +70,30 @@
     <div class="hero-copy">
       <div class="pill reveal">
         <span class="pill-dot"></span>
-        v1.2.1 · macOS 原生 · Apple Silicon &amp; Intel
+        <span data-i18n="hero.pill">v1.2.1 · macOS 原生 · Apple Silicon &amp; Intel</span>
       </div>
-      <h1 class="reveal">
+      <h1 class="reveal" data-i18n="hero.title">
         按住 <kbd class="kbd-hero">⌥</kbd>，<br />
         <span class="gradient-text">说出来就是文字</span>
       </h1>
-      <p class="lead reveal">
+      <p class="lead reveal" data-i18n="hero.lead">
         VoiceInput 是一款住在菜单栏里的语音输入工具。在任何编辑器、终端、聊天框里，
         按住右 Option 说话，松开后文字自动出现在光标处。
       </p>
       <div class="hero-cta reveal">
         <a class="btn btn-primary btn-glow" href="https://github.com/pudongkai/voice-input/releases/latest/download/VoiceInput.dmg">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.77-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.76 2.27-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.77.74 2.98.72 1.23-.02 2.01-1.12 2.76-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.66zM14.1 5.86c.63-.77 1.06-1.83.94-2.89-.91.04-2.01.61-2.67 1.37-.58.67-1.1 1.76-.96 2.8 1.02.08 2.06-.52 2.69-1.28z"/></svg>
-          下载 macOS 版
+          <span data-i18n="hero.download">下载 macOS 版</span>
         </a>
         <a class="btn btn-ghost" href="https://github.com/pudongkai/voice-input" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg>
-          GitHub 源码
+          <span data-i18n="hero.source">GitHub 源码</span>
         </a>
       </div>
       <ul class="hero-meta reveal">
-        <li><span class="check">✓</span>免费，无需 API Key</li>
-        <li><span class="check">✓</span>默认本机识别</li>
-        <li><span class="check">✓</span>任意 App 通用</li>
+        <li><span class="check">✓</span><span data-i18n="hero.meta1">免费，无需 API Key</span></li>
+        <li><span class="check">✓</span><span data-i18n="hero.meta2">默认本机识别</span></li>
+        <li><span class="check">✓</span><span data-i18n="hero.meta3">任意 App 通用</span></li>
       </ul>
     </div>
 
@@ -79,7 +102,7 @@
         <div class="orbit-ring r1"></div>
         <div class="orbit-ring r2"></div>
         <div class="orbit-ring r3"></div>
-        <img class="hero-icon" src="assets/icon.png" alt="VoiceInput 图标" width="220" height="220" />
+        <img class="hero-icon" src="assets/icon.png" alt="VoiceInput 图标" data-i18n-attr="alt:hero.iconAlt" width="220" height="220" />
         <div class="sound-ripple"></div>
         <div class="sound-ripple d2"></div>
         <div class="sound-ripple d3"></div>
@@ -93,13 +116,13 @@
       <div class="mac-menubar">
         <div class="mb-left">
           <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.77-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.76 2.27-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.77.74 2.98.72 1.23-.02 2.01-1.12 2.76-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.66zM14.1 5.86c.63-.77 1.06-1.83.94-2.89-.91.04-2.01.61-2.67 1.37-.58.67-1.1 1.76-.96 2.8 1.02.08 2.06-.52 2.69-1.28z"/></svg>
-          <b>终端</b><span>Shell</span><span>编辑</span><span>显示</span><span>窗口</span>
+          <b data-i18n="demo.mbTerminal">终端</b><span>Shell</span><span data-i18n="demo.mbEdit">编辑</span><span data-i18n="demo.mbView">显示</span><span data-i18n="demo.mbWindow">窗口</span>
         </div>
         <div class="mb-right">
           <span class="mb-mic" id="mbMic" title="VoiceInput">
             <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
           </span>
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="12" cy="19.5" r="1.4" fill="currentColor"/></svg><span class="mb-time" id="mbTime">周五 10:24</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="12" cy="19.5" r="1.4" fill="currentColor"/></svg><span class="mb-time" id="mbTime" data-i18n="demo.time">周五 10:24</span>
         </div>
       </div>
       <div class="mac-desktop">
@@ -117,10 +140,10 @@
         <div class="window chat">
           <div class="win-bar">
             <i class="tl r"></i><i class="tl y"></i><i class="tl g"></i>
-            <span class="win-title">消息</span>
+            <span class="win-title" data-i18n="demo.messages">消息</span>
           </div>
           <div class="chat-body">
-            <div class="bubble in">今晚的发布还顺利吗？</div>
+            <div class="bubble in" data-i18n="demo.bubbleIn">今晚的发布还顺利吗？</div>
             <div class="bubble out" id="bubbleOut" hidden></div>
             <div class="chat-input"><span id="typed2"></span><span class="caret" id="caret2"></span></div>
           </div>
@@ -134,8 +157,8 @@
             <svg class="ico ico-check" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#06110b" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="hud-text">
-            <div class="hud-title" id="hudTitle">正在聆听…</div>
-            <div class="hud-body" id="hudBody">松开右 Option 结束</div>
+            <div class="hud-title" id="hudTitle" data-i18n="hud.listening">正在聆听…</div>
+            <div class="hud-body" id="hudBody" data-i18n="hud.release">松开右 Option 结束</div>
           </div>
           <div class="hud-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
@@ -143,46 +166,46 @@
         <!-- 键盘提示 -->
         <div class="key-hint" id="keyHint">
           <kbd class="key-opt" id="keyOpt"><small>option</small>⌥</kbd>
-          <span id="keyHintText">按住右 Option 说话</span>
+          <span id="keyHintText" data-i18n="demo.hint">按住右 Option 说话</span>
         </div>
       </div>
     </div>
-    <p class="demo-caption">↑ 页面内实时演示：按住、说话、松开，文字直接进入当前窗口</p>
+    <p class="demo-caption" data-i18n="demo.caption">↑ 页面内实时演示：按住、说话、松开，文字直接进入当前窗口</p>
   </section>
 
   <!-- 数据条 -->
   <section class="stats">
-    <div class="stat reveal"><b data-count="0">0</b><span>需要的 API Key</span></div>
-    <div class="stat reveal"><b>¥<span data-count="0">0</span></b><span>使用费用</span></div>
-    <div class="stat reveal"><b><span data-count="60">0</span>s</b><span>单次最长录音</span></div>
-    <div class="stat reveal"><b><span data-count="2">0</span></b><span>架构通用（arm64 · x86_64）</span></div>
+    <div class="stat reveal"><b data-count="0">0</b><span data-i18n="stats.apiKey">需要的 API Key</span></div>
+    <div class="stat reveal"><b><span data-i18n="stats.currency">¥</span><span data-count="0">0</span></b><span data-i18n="stats.cost">使用费用</span></div>
+    <div class="stat reveal"><b><span data-count="60">0</span>s</b><span data-i18n="stats.maxRec">单次最长录音</span></div>
+    <div class="stat reveal"><b><span data-count="2">0</span></b><span data-i18n="stats.arch">架构通用（arm64 · x86_64）</span></div>
   </section>
 
   <!-- 工作方式 -->
   <section class="section" id="how" data-anim>
     <div class="section-head reveal">
       <span class="eyebrow">HOW IT WORKS</span>
-      <h2>三步，没有学习成本</h2>
-      <p>不切换窗口，不点按钮。手不离键盘，就能把想法变成文字。</p>
+      <h2 data-i18n="how.title">三步，没有学习成本</h2>
+      <p data-i18n="how.desc">不切换窗口，不点按钮。手不离键盘，就能把想法变成文字。</p>
     </div>
     <div class="steps">
       <div class="step card reveal">
         <div class="step-num">01</div>
         <div class="step-visual"><div class="cursor-box"><span class="blink-caret"></span></div></div>
-        <h3>光标停在输入框</h3>
-        <p>终端、代码编辑器、浏览器、聊天软件……任何能打字的地方都行。</p>
+        <h3 data-i18n="how.s1">光标停在输入框</h3>
+        <p data-i18n="how.s1d">终端、代码编辑器、浏览器、聊天软件……任何能打字的地方都行。</p>
       </div>
       <div class="step card reveal">
         <div class="step-num">02</div>
         <div class="step-visual"><kbd class="key-big pressing"><small>option</small>⌥</kbd><div class="mini-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-        <h3>按住右 Option 说话</h3>
-        <p>屏幕底部出现“正在聆听…”，边说边显示识别结果。</p>
+        <h3 data-i18n="how.s2">按住右 Option 说话</h3>
+        <p data-i18n="how.s2d">屏幕底部出现“正在聆听…”，边说边显示识别结果。</p>
       </div>
       <div class="step card reveal">
         <div class="step-num">03</div>
-        <div class="step-visual"><div class="out-text">帮我把这段代码重构一下<span class="blink-caret"></span></div></div>
-        <h3>松开，文字自动输入</h3>
-        <p>识别结果直接粘贴到光标处，按回车即可发送。</p>
+        <div class="step-visual"><div class="out-text" data-i18n="how.sample">帮我把这段代码重构一下<span class="blink-caret"></span></div></div>
+        <h3 data-i18n="how.s3">松开，文字自动输入</h3>
+        <p data-i18n="how.s3d">识别结果直接粘贴到光标处，按回车即可发送。</p>
       </div>
     </div>
   </section>
@@ -191,8 +214,8 @@
   <section class="section" id="features" data-anim>
     <div class="section-head reveal">
       <span class="eyebrow">FEATURES</span>
-      <h2>小巧，但每个细节都想过</h2>
-      <p>纯 Swift 编写的原生菜单栏 App，没有 Node、Python 或任何运行时依赖。</p>
+      <h2 data-i18n="feat.title">小巧，但每个细节都想过</h2>
+      <p data-i18n="feat.desc">纯 Swift 编写的原生菜单栏 App，没有 Node、Python 或任何运行时依赖。</p>
     </div>
 
     <div class="bento">
@@ -200,26 +223,26 @@
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h3>语音不出本机</h3>
-        <p>默认优先使用 Apple 设备端识别。下载中文听写语言包后完全离线工作，录音不会发到任何服务器。</p>
+        <h3 data-i18n="feat.privacy">语音不出本机</h3>
+        <p data-i18n="feat.privacyD">默认优先使用 Apple 设备端识别。下载中文听写语言包后完全离线工作，录音不会发到任何服务器。</p>
         <div class="privacy-viz">
           <div class="pv-node">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
-            <span>麦克风</span>
+            <span data-i18n="feat.pvMic">麦克风</span>
           </div>
           <div class="pv-line"><i></i></div>
           <div class="pv-node chip">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            <span>本机识别</span>
+            <span data-i18n="feat.pvLocal">本机识别</span>
           </div>
           <div class="pv-line"><i></i></div>
           <div class="pv-node">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            <span>文字</span>
+            <span data-i18n="feat.pvText">文字</span>
           </div>
           <div class="pv-cloud">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6 9.5 4.25 4.25 0 0 0 7 18z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            云端
+            <span data-i18n="feat.pvCloud">云端</span>
           </div>
         </div>
       </article>
@@ -228,11 +251,11 @@
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 9l3 2.5L7 14M12 14h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h3>哪里能打字，哪里就能说</h3>
-        <p>系统级输入，不依赖任何插件。</p>
+        <h3 data-i18n="feat.anywhere">哪里能打字，哪里就能说</h3>
+        <p data-i18n="feat.anywhereD">系统级输入，不依赖任何插件。</p>
         <div class="app-cloud">
-          <span>终端</span><span>VS Code</span><span>Xcode</span><span>iTerm2</span><span>Safari</span>
-          <span>Chrome</span><span>微信</span><span>飞书</span><span>备忘录</span><span>邮件</span><span>Slack</span><span>Notion</span>
+          <span data-i18n="feat.appTerminal">终端</span><span>VS Code</span><span>Xcode</span><span>iTerm2</span><span>Safari</span>
+          <span>Chrome</span><span data-i18n="feat.appWeChat">微信</span><span data-i18n="feat.appFeishu">飞书</span><span data-i18n="feat.appNotes">备忘录</span><span data-i18n="feat.appMail">邮件</span><span>Slack</span><span>Notion</span>
         </div>
       </article>
 
@@ -240,25 +263,25 @@
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
-        <h3>防误触</h3>
-        <p>按住不到 0.35 秒不触发；按住 ⌥ 时按了别的键（比如 ⌥+方向键），这次录音自动取消，原快捷键照常生效。</p>
+        <h3 data-i18n="feat.guard">防误触</h3>
+        <p data-i18n="feat.guardD">按住不到 0.35 秒不触发；按住 ⌥ 时按了别的键（比如 ⌥+方向键），这次录音自动取消，原快捷键照常生效。</p>
       </article>
 
       <article class="card bento-d reveal">
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 3v3h6V3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
         </div>
-        <h3>两种输入方式</h3>
-        <p>默认像打字一样逐字输入，不动你的剪贴板；切换成「粘贴」后，识别出的文字还会同时复制到剪贴板，方便再贴一次。</p>
-        <div class="seg"><span class="on">模拟键盘输入</span><span>粘贴</span></div>
+        <h3 data-i18n="feat.insert">两种输入方式</h3>
+        <p data-i18n="feat.insertD">默认像打字一样逐字输入，不动你的剪贴板；切换成「粘贴」后，识别出的文字还会同时复制到剪贴板，方便再贴一次。</p>
+        <div class="seg"><span class="on" data-i18n="feat.segType">模拟键盘输入</span><span data-i18n="feat.segPaste">粘贴</span></div>
       </article>
 
       <article class="card bento-e reveal">
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
         </div>
-        <h3>悬浮窗透明度，拖动即见</h3>
-        <p>菜单里直接拖滑块，实时预览，不用重启。试试看：</p>
+        <h3 data-i18n="feat.opacity">悬浮窗透明度，拖动即见</h3>
+        <p data-i18n="feat.opacityD">菜单里直接拖滑块，实时预览，不用重启。试试看：</p>
         <div class="opacity-demo">
           <div class="od-stage">
             <div class="od-bg"><span>const</span> <span>answer</span> = <span>42</span>;<br /><span>function</span> hello() {}</div>
@@ -267,13 +290,13 @@
                 <svg class="ico ico-wave" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 6v12M23 10v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
               </div>
               <div class="hud-text">
-                <div class="hud-title" id="odTitle">悬浮窗透明度 45%</div>
-                <div class="hud-body">拖动滑块查看效果</div>
+                <div class="hud-title" id="odTitle" data-i18n="feat.odTitle">悬浮窗透明度 45%</div>
+                <div class="hud-body" data-i18n="feat.odBody">拖动滑块查看效果</div>
               </div>
             </div>
           </div>
           <label class="od-row">
-            <span>悬浮窗透明度</span>
+            <span data-i18n="feat.odLabel">悬浮窗透明度</span>
             <input type="range" id="odRange" min="30" max="100" value="45" />
             <output id="odOut">45%</output>
           </label>
@@ -284,21 +307,21 @@
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4V4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h8M8 12h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
-        <h3>中英混说 · 专有名词增强</h3>
-        <p>以中文为主，夹杂英文也能识别。把常用的项目名、框架名写进 <code>contextualStrings</code>，准确率明显提升。</p>
-        <div class="tags"><span>React</span><span>Kubernetes</span><span>SwiftUI</span><span>终端</span><span>+ 你的词</span></div>
+        <h3 data-i18n="feat.mixed">中英混说 · 专有名词增强</h3>
+        <p data-i18n="feat.mixedD">以中文为主，夹杂英文也能识别。把常用的项目名、框架名写进 <code>contextualStrings</code>，准确率明显提升。</p>
+        <div class="tags"><span>React</span><span>Kubernetes</span><span>SwiftUI</span><span data-i18n="feat.tagTerm">终端</span><span data-i18n="feat.tagYours">+ 你的词</span></div>
       </article>
 
       <article class="card bento-g reveal">
         <div class="feat-icon">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><rect x="3" y="3" width="18" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
         </div>
-        <h3>其余细节</h3>
+        <h3 data-i18n="feat.more">其余细节</h3>
         <ul class="mini-list">
-          <li>录音中按 <kbd>Esc</kbd> 取消</li>
-          <li>开机自动启动，可一键关闭</li>
-          <li>开始 / 结束提示音可关</li>
-          <li>选粘贴方式时，文字会同时留在剪贴板</li>
+          <li data-i18n="feat.more1">录音中按 <kbd>Esc</kbd> 取消</li>
+          <li data-i18n="feat.more2">开机自动启动，可一键关闭</li>
+          <li data-i18n="feat.more3">开始 / 结束提示音可关</li>
+          <li data-i18n="feat.more4">选粘贴方式时，文字会同时留在剪贴板</li>
         </ul>
       </article>
     </div>
@@ -308,14 +331,14 @@
   <section class="section" id="clipboard" data-anim>
     <div class="clip">
       <div class="clip-copy reveal">
-        <span class="new-pill">NEW · 新功能</span>
-        <h2>复制过的东西，<br /><span class="gradient-text">一个都不会丢</span></h2>
-        <p>VoiceInput 会悄悄记住你最近复制过的文字和图片。想再用之前复制的内容时，按一下快捷键就能找回来，直接粘贴。</p>
+        <span class="new-pill" data-i18n="clip.pill">NEW · 新功能</span>
+        <h2 data-i18n="clip.title">复制过的东西，<br /><span class="gradient-text">一个都不会丢</span></h2>
+        <p data-i18n="clip.desc">VoiceInput 会悄悄记住你最近复制过的文字和图片。想再用之前复制的内容时，按一下快捷键就能找回来，直接粘贴。</p>
         <ul class="clip-points">
-          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6 10h1M9.5 10h1M13 10h1M16.5 10h1M7.5 14h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><b>按 <kbd>⇧</kbd><kbd>⌘</kbd><kbd>V</kbd> 打开历史</b>在鼠标旁边弹出列表，用方向键选、回车粘贴，或者直接按数字键 1–9</div></li>
-          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.8" fill="currentColor"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><div><b>截图也能记住</b>截到剪贴板的截图、网页和聊天里复制的图片，都会显示成缩略图</div></li>
-          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 5l1.2-.8V8M3.6 11.2c.4-.6 1.8-.7 2 .1.2.8-2 1.9-2 2.7h2.2M3.6 16.6c.5-.5 2-.5 2 .4 0 .7-1.2.8-1.2.8s1.4.1 1.3.9c-.1 1-1.7.9-2.1.4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><b>记几条你说了算</b>菜单里选 10、20、50 或 100 条，默认 20 条</div></li>
-          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></span><div><b>只留在内存里</b>退出 App 就清空，不写进硬盘；密码管理器里复制的密码不会被记录</div></li>
+          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6 10h1M9.5 10h1M13 10h1M16.5 10h1M7.5 14h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div data-i18n="clip.p1"><b>按 <kbd>⇧</kbd><kbd>⌘</kbd><kbd>V</kbd> 打开历史</b>在鼠标旁边弹出列表，用方向键选、回车粘贴，或者直接按数字键 1–9</div></li>
+          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="10" r="1.8" fill="currentColor"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4 3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg></span><div data-i18n="clip.p2"><b>截图也能记住</b>截到剪贴板的截图、网页和聊天里复制的图片，都会显示成缩略图</div></li>
+          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 5l1.2-.8V8M3.6 11.2c.4-.6 1.8-.7 2 .1.2.8-2 1.9-2 2.7h2.2M3.6 16.6c.5-.5 2-.5 2 .4 0 .7-1.2.8-1.2.8s1.4.1 1.3.9c-.1 1-1.7.9-2.1.4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div data-i18n="clip.p3"><b>记几条你说了算</b>菜单里选 10、20、50 或 100 条，默认 20 条</div></li>
+          <li><span class="cp-ico"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="15.5" r="1.4" fill="currentColor"/></svg></span><div data-i18n="clip.p4"><b>只留在内存里</b>退出 App 就清空，不写进硬盘；密码管理器里复制的密码不会被记录</div></li>
         </ul>
       </div>
 
@@ -324,17 +347,17 @@
         <div class="clip-panel">
           <div class="cpn-head">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 4.5h6v2.5H9z" fill="currentColor"/></svg>
-            剪贴板历史<span>6 条</span>
+            <span class="cpn-title" data-i18n="clip.panelTitle">剪贴板历史</span><span class="cpn-count" data-i18n="clip.count">6 条</span>
           </div>
           <ol class="cpn-list" id="clipList">
-            <li class="on"><i>1</i><p>今晚八点准时发布新版本，记得提前十分钟上线检查一下配置</p><small>刚刚</small></li>
-            <li><i>2</i><div class="thumb"><b></b><b></b><b></b></div><p>图片 2880×1800</p><small>2 分钟前</small></li>
-            <li><i>3</i><p>https://github.com/pudongkai/voice-input</p><small>5 分钟前</small></li>
-            <li><i>4</i><p>git commit -m "修复登录页在深色模式下的显示问题"</p><small>12 分钟前</small></li>
-            <li><i>5</i><div class="thumb photo"></div><p>图片 1080×1440</p><small>1 小时前</small></li>
-            <li><i>6</i><p>周五下午三点，三楼大会议室</p><small>2 小时前</small></li>
+            <li class="on"><i>1</i><p data-i18n="clip.item1">今晚八点准时发布新版本，记得提前十分钟上线检查一下配置</p><small data-i18n="clip.ago0">刚刚</small></li>
+            <li><i>2</i><div class="thumb"><b></b><b></b><b></b></div><p data-i18n="clip.item2">图片 2880×1800</p><small data-i18n="clip.ago2m">2 分钟前</small></li>
+            <li><i>3</i><p>https://github.com/pudongkai/voice-input</p><small data-i18n="clip.ago5m">5 分钟前</small></li>
+            <li><i>4</i><p data-i18n="clip.item4">git commit -m "修复登录页在深色模式下的显示问题"</p><small data-i18n="clip.ago12m">12 分钟前</small></li>
+            <li><i>5</i><div class="thumb photo"></div><p data-i18n="clip.item5">图片 1080×1440</p><small data-i18n="clip.ago1h">1 小时前</small></li>
+            <li><i>6</i><p data-i18n="clip.item6">周五下午三点，三楼大会议室</p><small data-i18n="clip.ago2h">2 小时前</small></li>
           </ol>
-          <div class="cpn-foot"><span><kbd>↑↓</kbd>选择</span><span><kbd>↩</kbd>粘贴</span><span><kbd>1-9</kbd>快速粘贴</span><span class="r"><kbd>esc</kbd>关闭</span></div>
+          <div class="cpn-foot"><span data-i18n="clip.footSelect"><kbd>↑↓</kbd>选择</span><span data-i18n="clip.footPaste"><kbd>↩</kbd>粘贴</span><span data-i18n="clip.footQuick"><kbd>1-9</kbd>快速粘贴</span><span class="r" data-i18n="clip.footClose"><kbd>esc</kbd>关闭</span></div>
         </div>
       </div>
     </div>
@@ -344,8 +367,8 @@
   <section class="section" id="gallery" data-anim>
     <div class="section-head reveal">
       <span class="eyebrow">INTERFACE</span>
-      <h2>安静地待在菜单栏，需要时才出现</h2>
-      <p>所有设置都在菜单栏图标里，悬浮提示用颜色区分每个阶段。</p>
+      <h2 data-i18n="gal.title">安静地待在菜单栏，需要时才出现</h2>
+      <p data-i18n="gal.desc">所有设置都在菜单栏图标里，悬浮提示用颜色区分每个阶段。</p>
     </div>
 
     <div class="gallery">
@@ -353,53 +376,53 @@
         <div class="menu-mock">
           <div class="mm-bar">
             <span class="mm-mic"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></span>
-            <span>周五 10:24</span>
+            <span data-i18n="demo.time">周五 10:24</span>
           </div>
           <div class="mm-menu">
-            <div class="mm-item dis">就绪 · 按住右 Option 说话</div>
-            <div class="mm-item dis">最近：帮我把这段代码重构一下</div>
+            <div class="mm-item dis" data-i18n="gal.mReady">就绪 · 按住右 Option 说话</div>
+            <div class="mm-item dis" data-i18n="gal.mLatest">最近：帮我把这段代码重构一下</div>
             <hr />
-            <div class="mm-item sub">输入方式<span>›</span></div>
-            <div class="mm-item"><i>✓</i>设备端识别</div>
-            <div class="mm-item"><i>✓</i>播放提示音</div>
-            <div class="mm-item"><i>✓</i>显示悬浮提示</div>
-            <div class="mm-item slider-row">悬浮窗透明度 <span class="mm-slider"><b></b></span><small>45%</small></div>
+            <div class="mm-item sub" data-i18n="gal.mInput">输入方式<span>›</span></div>
+            <div class="mm-item" data-i18n="gal.mOnDevice"><i>✓</i>设备端识别</div>
+            <div class="mm-item" data-i18n="gal.mSounds"><i>✓</i>播放提示音</div>
+            <div class="mm-item" data-i18n="gal.mHud"><i>✓</i>显示悬浮提示</div>
+            <div class="mm-item slider-row" data-i18n="gal.mOpacity">悬浮窗透明度 <span class="mm-slider"><b></b></span><small>45%</small></div>
             <hr />
-            <div class="mm-item sub">剪贴板历史<span>›</span></div>
+            <div class="mm-item sub" data-i18n="gal.mClip">剪贴板历史<span>›</span></div>
             <hr />
-            <div class="mm-item">打开配置文件</div>
-            <div class="mm-item">重新加载配置</div>
+            <div class="mm-item" data-i18n="gal.mOpenCfg">打开配置文件</div>
+            <div class="mm-item" data-i18n="gal.mReload">重新加载配置</div>
             <hr />
-            <div class="mm-item"><i>✓</i>开机启动</div>
+            <div class="mm-item" data-i18n="gal.mLogin"><i>✓</i>开机启动</div>
             <hr />
             <div class="mm-item dis">VoiceInput v1.2.1</div>
-            <div class="mm-item">退出 VoiceInput<span class="sc">⌘Q</span></div>
+            <div class="mm-item" data-i18n="gal.mQuit">退出 VoiceInput<span class="sc">⌘Q</span></div>
           </div>
         </div>
-        <div class="shot-cap"><b>菜单栏</b>识别方式、提示音、透明度都在这里</div>
+        <div class="shot-cap" data-i18n="gal.capMenu"><b>菜单栏</b>识别方式、提示音、透明度都在这里</div>
       </div>
 
       <div class="shot shot-states reveal">
         <div class="states">
           <div class="hud hud-static" data-state="listening">
             <div class="hud-badge"><svg class="ico ico-wave" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 6v12M23 10v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></div>
-            <div class="hud-text"><div class="hud-title">正在聆听…</div><div class="hud-body">松开右 Option 结束</div></div>
+            <div class="hud-text"><div class="hud-title" data-i18n="hud.listening">正在聆听…</div><div class="hud-body" data-i18n="hud.release">松开右 Option 结束</div></div>
             <div class="hud-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           </div>
           <div class="hud hud-static" data-state="processing">
             <div class="hud-badge"><svg class="ico ico-dots" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="7.5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="16.5" cy="12" r="1.5" fill="currentColor"/></svg></div>
-            <div class="hud-text"><div class="hud-title">识别中…</div><div class="hud-body">今晚八点准时发布新版本</div></div>
+            <div class="hud-text"><div class="hud-title" data-i18n="hud.recognizing">识别中…</div><div class="hud-body" data-i18n="gal.sample">今晚八点准时发布新版本</div></div>
           </div>
           <div class="hud hud-static" data-state="success">
             <div class="hud-badge"><svg class="ico ico-check" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#06110b" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="hud-text"><div class="hud-title">已输入</div><div class="hud-body">今晚八点准时发布新版本</div></div>
+            <div class="hud-text"><div class="hud-title" data-i18n="hud.inserted">已输入</div><div class="hud-body" data-i18n="gal.sample">今晚八点准时发布新版本</div></div>
           </div>
           <div class="hud hud-static" data-state="error">
             <div class="hud-badge"><svg class="ico ico-warn" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5L23 21.5H1L12 2.5z" fill="currentColor"/><path d="M12 9v6M12 17.6v.4" stroke="#1a0e02" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-            <div class="hud-text"><div class="hud-title">没听清</div><div class="hud-body">再按住右 Option 说一次</div></div>
+            <div class="hud-text"><div class="hud-title" data-i18n="gal.error">没听清</div><div class="hud-body" data-i18n="gal.errorBody">再按住右 Option 说一次</div></div>
           </div>
         </div>
-        <div class="shot-cap"><b>悬浮提示</b>聆听 · 识别 · 完成 · 出错，一眼就知道状态</div>
+        <div class="shot-cap" data-i18n="gal.capStates"><b>悬浮提示</b>聆听 · 识别 · 完成 · 出错，一眼就知道状态</div>
       </div>
 
       <div class="shot shot-config reveal">
@@ -408,7 +431,7 @@
             <i class="tl r"></i><i class="tl y"></i><i class="tl g"></i>
             <span class="win-title">~/.config/voice-input/config.json</span>
           </div>
-<pre class="code"><code>{
+<pre class="code"><code data-i18n="gal.config">{
   <span class="k">"locale"</span>: <span class="s">"zh-CN"</span>,
   <span class="k">"insertMethod"</span>: <span class="s">"type"</span>,
   <span class="k">"onDeviceRecognition"</span>: <span class="b">true</span>,
@@ -419,7 +442,7 @@
   <span class="k">"contextualStrings"</span>: [<span class="s">"插件"</span>, <span class="s">"终端"</span>]
 }</code></pre>
         </div>
-        <div class="shot-cap"><b>配置文件</b>一个 JSON，改完在菜单里“重新加载配置”即生效</div>
+        <div class="shot-cap" data-i18n="gal.capConfig"><b>配置文件</b>一个 JSON，改完在菜单里“重新加载配置”即生效</div>
       </div>
     </div>
   </section>
@@ -428,8 +451,8 @@
   <section class="section" id="install">
     <div class="section-head reveal">
       <span class="eyebrow">GET STARTED</span>
-      <h2>一分钟装好</h2>
-      <p>支持 Apple Silicon 与 Intel 芯片的 Mac。</p>
+      <h2 data-i18n="install.title">一分钟装好</h2>
+      <p data-i18n="install.desc">支持 Apple Silicon 与 Intel 芯片的 Mac。</p>
     </div>
 
     <div class="install">
@@ -438,26 +461,26 @@
           <img src="assets/icon.png" alt="" width="56" height="56" />
           <div>
             <b>VoiceInput for Mac</b>
-            <span>打开后把 VoiceInput 拖进「应用程序」文件夹即可</span>
+            <span data-i18n="install.dlHint">打开后把 VoiceInput 拖进「应用程序」文件夹即可</span>
           </div>
           <span class="dl-arrow">↓</span>
         </a>
-        <a class="all-rel reveal" href="https://github.com/pudongkai/voice-input/releases" target="_blank" rel="noopener">查看所有版本 →</a>
+        <a class="all-rel reveal" href="https://github.com/pudongkai/voice-input/releases" target="_blank" rel="noopener" data-i18n="install.allReleases">查看所有版本 →</a>
 
         <div class="card note reveal">
-          <h4>第一次打开时提示“无法验证开发者”？</h4>
-          <p>这是 macOS 对没有在 Apple 登记过的 App 的常规提醒，按下面做一次就好，以后不会再出现：</p>
+          <h4 data-i18n="install.noteTitle">第一次打开时提示“无法验证开发者”？</h4>
+          <p data-i18n="install.noteDesc">这是 macOS 对没有在 Apple 登记过的 App 的常规提醒，按下面做一次就好，以后不会再出现：</p>
           <ol class="note-steps">
-            <li>在提示框里点「完成」（或「好」）关掉它</li>
-            <li>打开「系统设置」→ 左侧选「隐私与安全性」</li>
-            <li>往下滚动，找到“已阻止打开 VoiceInput”，点旁边的「仍要打开」</li>
-            <li>输入开机密码确认，App 就能正常打开了</li>
+            <li data-i18n="install.note1">在提示框里点「完成」（或「好」）关掉它</li>
+            <li data-i18n="install.note2">打开「系统设置」→ 左侧选「隐私与安全性」</li>
+            <li data-i18n="install.note3">往下滚动，找到“已阻止打开 VoiceInput”，点旁边的「仍要打开」</li>
+            <li data-i18n="install.note4">输入开机密码确认，App 就能正常打开了</li>
           </ol>
           <details class="adv">
-            <summary>备用方法（熟悉终端的用户）</summary>
+            <summary data-i18n="install.adv">备用方法（熟悉终端的用户）</summary>
             <div class="cmd">
               <code id="cmdText">xattr -dr com.apple.quarantine /Applications/VoiceInput.app</code>
-              <button class="copy" data-copy="cmdText" type="button">复制</button>
+              <button class="copy" data-copy="cmdText" type="button" data-i18n="copy.label">复制</button>
             </div>
           </details>
         </div>
@@ -468,25 +491,25 @@
           <span class="ps-ico mic">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
           </span>
-          <div><b>授权麦克风</b><span>用于录音</span></div>
+          <div><b data-i18n="install.permMic">授权麦克风</b><span data-i18n="install.permMicD">用于录音</span></div>
         </li>
         <li class="card reveal">
           <span class="ps-ico speech">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
           </span>
-          <div><b>授权语音识别</b><span>把录音转成文字</span></div>
+          <div><b data-i18n="install.permSpeech">授权语音识别</b><span data-i18n="install.permSpeechD">把录音转成文字</span></div>
         </li>
         <li class="card reveal">
           <span class="ps-ico ax">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2" fill="currentColor"/><path d="M5 8l7 1.5L19 8M12 9.5V14l-3 6.5M12 14l3 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
           </span>
-          <div><b>授权辅助功能</b><span>监听右 Option，并把文字输入当前窗口</span></div>
+          <div><b data-i18n="install.permAx">授权辅助功能</b><span data-i18n="install.permAxD">监听右 Option，并把文字输入当前窗口</span></div>
         </li>
         <li class="card reveal">
           <span class="ps-ico dl2">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
           </span>
-          <div><b>打开系统「听写」</b><span>系统设置 → 键盘 → 听写，打开开关并添加「中文（普通话）」。语音识别需要它，下载完语言包后还能完全离线使用</span></div>
+          <div><b data-i18n="install.permDict">打开系统「听写」</b><span data-i18n="install.permDictD">系统设置 → 键盘 → 听写，打开开关并添加「中文（普通话）」。语音识别需要它，下载完语言包后还能完全离线使用</span></div>
         </li>
       </ol>
     </div>
@@ -496,108 +519,108 @@
   <section class="section" id="faq">
     <div class="section-head reveal">
       <span class="eyebrow">FAQ</span>
-      <h2>常见问题</h2>
+      <h2 data-i18n="faq.title">常见问题</h2>
     </div>
     <div class="faq">
       <details class="card reveal">
-        <summary>按住右边的 Option 键没反应？</summary>
+        <summary data-i18n="faq.q1">按住右边的 Option 键没反应？</summary>
         <div>
-          <p>多半是“辅助功能”权限没打开，或者打开后 App 还没重启：</p>
+          <p data-i18n="faq.q1p1">多半是“辅助功能”权限没打开，或者打开后 App 还没重启：</p>
           <ol>
-            <li>打开「系统设置」→「隐私与安全性」→「辅助功能」，确认 VoiceInput 的开关是打开的</li>
-            <li>点屏幕右上角的麦克风图标 → 退出 VoiceInput，再重新打开它</li>
+            <li data-i18n="faq.q1l1">打开「系统设置」→「隐私与安全性」→「辅助功能」，确认 VoiceInput 的开关是打开的</li>
+            <li data-i18n="faq.q1l2">点屏幕右上角的麦克风图标 → 退出 VoiceInput，再重新打开它</li>
           </ol>
-          <p>注意要按<b>键盘右边</b>的 Option（⌥）键，左边的不算。正在录音时，右上角的麦克风图标会变红。</p>
+          <p data-i18n="faq.q1p2">注意要按<b>键盘右边</b>的 Option（⌥）键，左边的不算。正在录音时，右上角的麦克风图标会变红。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>提示“Siri and Dictation are disabled”或“请先打开系统听写”？</summary>
+        <summary data-i18n="faq.q2">提示“Siri and Dictation are disabled”或“请先打开系统听写”？</summary>
         <div>
-          <p>这表示 Mac 的「听写」功能关着。苹果的语音识别要先打开它才能用：</p>
+          <p data-i18n="faq.q2p1">这表示 Mac 的「听写」功能关着。苹果的语音识别要先打开它才能用：</p>
           <ol>
-            <li>打开「系统设置」→「键盘」</li>
-            <li>找到「听写」，把开关打开，语言里选上「中文（普通话）」</li>
-            <li>回到任意输入框，再按住右 Option 说话试试</li>
+            <li data-i18n="faq.q2l1">打开「系统设置」→「键盘」</li>
+            <li data-i18n="faq.q2l2">找到「听写」，把开关打开，语言里选上「中文（普通话）」</li>
+            <li data-i18n="faq.q2l3">回到任意输入框，再按住右 Option 说话试试</li>
           </ol>
-          <p>出现这个提示时，VoiceInput 会自动帮你打开键盘设置页面。</p>
+          <p data-i18n="faq.q2p2">出现这个提示时，VoiceInput 会自动帮你打开键盘设置页面。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>看到了“正在聆听…”，但松开后文字没出来？</summary>
+        <summary data-i18n="faq.q3">看到了“正在聆听…”，但松开后文字没出来？</summary>
         <div>
-          <p>先确认光标停在一个可以打字的地方（比如输入框里在闪的那条竖线）。</p>
-          <p>如果还是不行，同样检查一下「辅助功能」权限是否打开——VoiceInput 需要这个权限才能替你把文字“打”进去。个别软件不接受逐字输入，可以在菜单里把「输入方式」换成「粘贴」试试。</p>
+          <p data-i18n="faq.q3p1">先确认光标停在一个可以打字的地方（比如输入框里在闪的那条竖线）。</p>
+          <p data-i18n="faq.q3p2">如果还是不行，同样检查一下「辅助功能」权限是否打开——VoiceInput 需要这个权限才能替你把文字“打”进去。个别软件不接受逐字输入，可以在菜单里把「输入方式」换成「粘贴」试试。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>需要联网吗？我说的话会被上传吗？</summary>
+        <summary data-i18n="faq.q4">需要联网吗？我说的话会被上传吗？</summary>
         <div>
-          <p>可以完全不联网。只要在 Mac 上下载一次中文语音包，识别就全部在你的电脑上完成，声音不会离开这台 Mac：</p>
+          <p data-i18n="faq.q4p1">可以完全不联网。只要在 Mac 上下载一次中文语音包，识别就全部在你的电脑上完成，声音不会离开这台 Mac：</p>
           <ol>
-            <li>打开「系统设置」→「键盘」</li>
-            <li>找到「听写」，打开它，语言里添加「中文（普通话）」</li>
-            <li>等它下载完成即可</li>
+            <li data-i18n="faq.q4l1">打开「系统设置」→「键盘」</li>
+            <li data-i18n="faq.q4l2">找到「听写」，打开它，语言里添加「中文（普通话）」</li>
+            <li data-i18n="faq.q4l3">等它下载完成即可</li>
           </ol>
-          <p>没下载语音包时，VoiceInput 会改用苹果的在线识别，同样能用，但需要联网，声音会发送给苹果处理。</p>
+          <p data-i18n="faq.q4p2">没下载语音包时，VoiceInput 会改用苹果的在线识别，同样能用，但需要联网，声音会发送给苹果处理。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>识别出来的字不太准怎么办？</summary>
+        <summary data-i18n="faq.q5">识别出来的字不太准怎么办？</summary>
         <div>
-          <p>几个小建议：</p>
+          <p data-i18n="faq.q5p1">几个小建议：</p>
           <ol>
-            <li>说话时离麦克风近一点，语速正常、吐字清楚</li>
-            <li>中文里夹几个英文单词没问题，但一句话里中英文来回切换太多，准确率会下降</li>
-            <li>按上一条的方法下载中文语音包，识别会更稳定</li>
+            <li data-i18n="faq.q5l1">说话时离麦克风近一点，语速正常、吐字清楚</li>
+            <li data-i18n="faq.q5l2">中文里夹几个英文单词没问题，但一句话里中英文来回切换太多，准确率会下降</li>
+            <li data-i18n="faq.q5l3">按上一条的方法下载中文语音包，识别会更稳定</li>
           </ol>
-          <p><b>经常说错的人名、公司名、专业词，可以“教”给它：</b></p>
+          <p data-i18n="faq.q5p2"><b>经常说错的人名、公司名、专业词，可以“教”给它：</b></p>
           <ol>
-            <li>点屏幕右上角的麦克风图标 →「打开配置文件」</li>
-            <li>找到 <code>contextualStrings</code> 那一行，在方括号里按格式加上你的词，比如：<br /><code>"contextualStrings": ["张三", "飞书", "周报"]</code></li>
-            <li>保存文件，再点菜单里的「重新加载配置」，马上生效</li>
+            <li data-i18n="faq.q5l4">点屏幕右上角的麦克风图标 →「打开配置文件」</li>
+            <li data-i18n="faq.q5l5">找到 <code>contextualStrings</code> 那一行，在方括号里按格式加上你的词，比如：<br /><code>"contextualStrings": ["张三", "飞书", "周报"]</code></li>
+            <li data-i18n="faq.q5l6">保存文件，再点菜单里的「重新加载配置」，马上生效</li>
           </ol>
-          <p class="faq-note">注意：每个词前后要用英文双引号 <code>"</code>，词与词之间用英文逗号 <code>,</code> 隔开，用中文引号或逗号会不生效。</p>
+          <p class="faq-note" data-i18n="faq.q5note">注意：每个词前后要用英文双引号 <code>"</code>，词与词之间用英文逗号 <code>,</code> 隔开，用中文引号或逗号会不生效。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>用完后，剪贴板里的内容变了？</summary>
+        <summary data-i18n="faq.q6">用完后，剪贴板里的内容变了？</summary>
         <div>
-          <p>默认的输入方式是「模拟键盘输入」，像打字一样把文字逐字输进去，不会动你的剪贴板。</p>
-          <p>如果你在菜单里把输入方式换成了「粘贴」，识别出的文字会同时复制到剪贴板，方便你在别处按 ⌘V 再贴一次。不想这样的话，点屏幕右上角的麦克风图标 →「输入方式」→ 选回「模拟键盘输入」。</p>
+          <p data-i18n="faq.q6p1">默认的输入方式是「模拟键盘输入」，像打字一样把文字逐字输进去，不会动你的剪贴板。</p>
+          <p data-i18n="faq.q6p2">如果你在菜单里把输入方式换成了「粘贴」，识别出的文字会同时复制到剪贴板，方便你在别处按 ⌘V 再贴一次。不想这样的话，点屏幕右上角的麦克风图标 →「输入方式」→ 选回「模拟键盘输入」。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>按 ⇧⌘V 不再是“粘贴并匹配格式”了？</summary>
+        <summary data-i18n="faq.q7">按 ⇧⌘V 不再是“粘贴并匹配格式”了？</summary>
         <div>
-          <p>开启剪贴板历史后，⇧⌘V 用来打开历史列表，所以 Chrome、Slack 等软件里同一个快捷键的“粘贴并匹配格式”会暂时用不了。</p>
-          <p>如果你更常用原来的功能，点屏幕右上角的麦克风图标 →「剪贴板历史」→ 取消「开启剪贴板历史」，⇧⌘V 就会恢复原样。</p>
+          <p data-i18n="faq.q7p1">开启剪贴板历史后，⇧⌘V 用来打开历史列表，所以 Chrome、Slack 等软件里同一个快捷键的“粘贴并匹配格式”会暂时用不了。</p>
+          <p data-i18n="faq.q7p2">如果你更常用原来的功能，点屏幕右上角的麦克风图标 →「剪贴板历史」→ 取消「开启剪贴板历史」，⇧⌘V 就会恢复原样。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>剪贴板历史会被保存或上传吗？</summary>
+        <summary data-i18n="faq.q8">剪贴板历史会被保存或上传吗？</summary>
         <div>
-          <p>不会。历史只放在电脑内存里，不写进硬盘，也不会发到任何地方；退出 VoiceInput 或重启电脑后就清空了。</p>
-          <p>1Password 等密码管理器复制的密码会被自动跳过。想马上清掉，点菜单里的「剪贴板历史」→「清空历史」。</p>
+          <p data-i18n="faq.q8p1">不会。历史只放在电脑内存里，不写进硬盘，也不会发到任何地方；退出 VoiceInput 或重启电脑后就清空了。</p>
+          <p data-i18n="faq.q8p2">1Password 等密码管理器复制的密码会被自动跳过。想马上清掉，点菜单里的「剪贴板历史」→「清空历史」。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>每次开机都会自动启动吗？怎么关掉？</summary>
+        <summary data-i18n="faq.q9">每次开机都会自动启动吗？怎么关掉？</summary>
         <div>
-          <p>第一次从「应用程序」里打开后，它会自动设置为开机启动，这样随时都能用。</p>
-          <p>不想要的话，点屏幕右上角的麦克风图标，再点一下菜单里的「开机启动」，前面的勾消失就关掉了。</p>
+          <p data-i18n="faq.q9p1">第一次从「应用程序」里打开后，它会自动设置为开机启动，这样随时都能用。</p>
+          <p data-i18n="faq.q9p2">不想要的话，点屏幕右上角的麦克风图标，再点一下菜单里的「开机启动」，前面的勾消失就关掉了。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>怎么升级到新版本？</summary>
+        <summary data-i18n="faq.q10">怎么升级到新版本？</summary>
         <div>
-          <p>VoiceInput 会自动检查新版本。有新版时，点屏幕右上角的麦克风图标，菜单最上面会出现「更新到 v…」，点一下就会自动下载、安装并重新打开，不用自己拖拽。</p>
-          <p>更新完成后，记得到「系统设置」→「隐私与安全性」→「辅助功能」里重新打开 VoiceInput 的开关。也可以随时点菜单里的「检查更新…」手动检查。</p>
+          <p data-i18n="faq.q10p1">VoiceInput 会自动检查新版本。有新版时，点屏幕右上角的麦克风图标，菜单最上面会出现「更新到 v…」，点一下就会自动下载、安装并重新打开，不用自己拖拽。</p>
+          <p data-i18n="faq.q10p2">更新完成后，记得到「系统设置」→「隐私与安全性」→「辅助功能」里重新打开 VoiceInput 的开关。也可以随时点菜单里的「检查更新…」手动检查。</p>
         </div>
       </details>
       <details class="card reveal">
-        <summary>收费吗？需要注册账号吗？</summary>
+        <summary data-i18n="faq.q11">收费吗？需要注册账号吗？</summary>
         <div>
-          <p>完全免费，不用注册，也不用填写任何密钥。语音识别用的是 Mac 系统自带的功能。</p>
+          <p data-i18n="faq.q11p1">完全免费，不用注册，也不用填写任何密钥。语音识别用的是 Mac 系统自带的功能。</p>
         </div>
       </details>
     </div>
@@ -607,55 +630,56 @@
   <section class="section" id="donate">
     <div class="section-head reveal">
       <span class="eyebrow">SUPPORT</span>
-      <h2>觉得好用？请作者喝杯咖啡</h2>
-      <p>VoiceInput 永久免费。打赏完全自愿，金额随意，你的支持会让它变得更好。</p>
+      <h2 data-i18n="donate.title">觉得好用？请作者喝杯咖啡</h2>
+      <p data-i18n="donate.desc">VoiceInput 永久免费。打赏完全自愿，金额随意，你的支持会让它变得更好。</p>
     </div>
     <div class="donate">
       <figure class="pay-card wechat reveal">
         <div class="pay-head">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 3.5C4.86 3.5 1.5 6.3 1.5 9.75c0 1.95 1.08 3.7 2.77 4.85l-.69 2.07 2.43-1.21c.9.27 1.9.42 2.94.42.19 0 .37 0 .56-.02a5.6 5.6 0 0 1-.23-1.58c0-3.36 3.2-6.08 7.15-6.08.2 0 .39 0 .58.02C16.3 5.6 13 3.5 9 3.5zM6.5 7.4a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm5.4 2.7c-3.4 0-6.15 2.3-6.15 5.13s2.75 5.12 6.15 5.12c.74 0 1.45-.1 2.1-.3l1.96.98-.55-1.66c1.4-.94 2.29-2.4 2.29-4.14 0-2.83-2.75-5.13-5.8-5.13zm-2.1 2.4a.85.85 0 1 1 0 1.7.85.85 0 0 1 0-1.7zm4.2 0a.85.85 0 1 1 0 1.7.85.85 0 0 1 0-1.7z"/></svg>
-          微信
+          <span data-i18n="donate.wechat">微信</span>
         </div>
         <div class="qr-frame">
-          <img src="assets/donate-wechat.png" alt="微信收款码" width="260" height="260" loading="lazy" />
+          <img src="assets/donate-wechat.png" alt="微信收款码" data-i18n-attr="alt:donate.wechatAlt" width="260" height="260" loading="lazy" />
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
         </div>
         <figcaption>
-          <b>打开微信「扫一扫」</b>
-          <span>收款人：Eoccc（**凯）</span>
+          <b data-i18n="donate.wechatScan">打开微信「扫一扫」</b>
+          <span data-i18n="donate.payee">收款人：Eoccc（**凯）</span>
         </figcaption>
       </figure>
 
       <figure class="pay-card alipay reveal">
         <div class="pay-head">
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor"/><path d="M6.5 8h11M12 5.5V8M8.5 10.5h7c-.6 3.9-4 7-8.5 8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 13.5c3 .3 6.5 2 9.5 4" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>
-          支付宝
+          <span data-i18n="donate.alipay">支付宝</span>
         </div>
         <div class="qr-frame">
-          <img src="assets/donate-alipay.png" alt="支付宝收款码" width="260" height="260" loading="lazy" />
+          <img src="assets/donate-alipay.png" alt="支付宝收款码" data-i18n-attr="alt:donate.alipayAlt" width="260" height="260" loading="lazy" />
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
         </div>
         <figcaption>
-          <b>打开支付宝「扫一扫」</b>
-          <span>收款人：Eoccc（**凯）</span>
+          <b data-i18n="donate.alipayScan">打开支付宝「扫一扫」</b>
+          <span data-i18n="donate.payee">收款人：Eoccc（**凯）</span>
         </figcaption>
       </figure>
     </div>
-    <p class="donate-tip reveal">在手机上浏览时，可以长按二维码保存图片，再到微信或支付宝的「扫一扫」里从相册选取。</p>
+    <p class="donate-tip reveal" data-i18n="donate.tip">在手机上浏览时，可以长按二维码保存图片，再到微信或支付宝的「扫一扫」里从相册选取。</p>
   </section>
 
   <!-- 结尾 CTA -->
   <section class="final reveal" id="download" data-anim>
     <img src="assets/icon.png" alt="" width="96" height="96" />
-    <h2>把键盘留给快捷键，<span class="gradient-text">把文字交给声音</span></h2>
-    <a class="btn btn-primary btn-glow" href="https://github.com/pudongkai/voice-input/releases/latest/download/VoiceInput.dmg">免费下载 VoiceInput</a>
+    <h2 data-i18n="final.title">把键盘留给快捷键，<span class="gradient-text">把文字交给声音</span></h2>
+    <a class="btn btn-primary btn-glow" href="https://github.com/pudongkai/voice-input/releases/latest/download/VoiceInput.dmg" data-i18n="final.download">免费下载 VoiceInput</a>
   </section>
 
   <footer class="footer">
     <div class="brand"><img src="assets/icon.png" alt="" width="22" height="22" /><span>VoiceInput</span></div>
-    <p>© 2026 Pudongkai · <a href="https://github.com/pudongkai/voice-input" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/pudongkai/voice-input/releases" target="_blank" rel="noopener">版本发布</a></p>
+    <p>© 2026 Pudongkai · <a href="https://github.com/pudongkai/voice-input" target="_blank" rel="noopener">GitHub</a> · <a href="https://github.com/pudongkai/voice-input/releases" target="_blank" rel="noopener" data-i18n="footer.releases">版本发布</a></p>
   </footer>
 
+  <script src="i18n.js" defer></script>
   <script src="main.js" defer></script>
 </body>
 </html>

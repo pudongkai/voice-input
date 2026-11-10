@@ -2,6 +2,7 @@
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (id) => document.getElementById(id);
+  const t = (key, vars) => window.I18N.t(key, vars);
 
   /* ---------- 滚出屏幕或切到其他标签页时暂停动画和演示 ---------- */
   const onScreen = new WeakSet();
@@ -61,10 +62,22 @@
   }
 
   /* ---------- 首屏演示：模拟按住 ⌥ → 聆听 → 识别 → 输入 ---------- */
-  const SCRIPTS = [
-    { target: "typed1", caret: "caret1", text: "修复登录页在深色模式下的显示问题" },
-    { target: "typed2", caret: "caret2", text: "很顺利，今晚八点准时发布新版本", send: true },
+  const demoScripts = () => [
+    { target: "typed1", caret: "caret1", text: t("demo.text1") },
+    { target: "typed2", caret: "caret2", text: t("demo.text2"), send: true },
   ];
+
+  // 边说边出字：中文每次出两三个字，英文每次出一个词
+  const speechChunks = (text) =>
+    (window.I18N.lang === "en" ? text.match(/\S+\s*/g) : text.match(/.{1,3}/gu)) || [];
+
+  // 切换语言时递增；正在播放的一轮发现代数变了就中止，从头用新语言播放
+  let demoGen = 0;
+  const DEMO_ABORTED = Symbol("demo aborted");
+  const demoSleep = async (ms, gen) => {
+    await sleep(ms);
+    if (gen !== demoGen) throw DEMO_ABORTED;
+  };
 
   function hudSet(state, title, body) {
     const hud = $("hud");
@@ -81,66 +94,80 @@
     $("keyHintText").textContent = hint;
   }
 
-  async function runOnce(s) {
+  async function runOnce(s, gen) {
     const target = $(s.target);
     target.textContent = "";
     for (const c of ["caret1", "caret2"]) $(c).classList.toggle("off", c !== s.caret);
-    await sleep(900);
+    await demoSleep(900, gen);
 
-    setKey(true, "按住右 Option 说话…");
-    hudSet("listening", "正在聆听…", "松开右 Option 结束");
-    await sleep(700);
-    // 边说边出字：按词组逐段更新识别中的文字
-    const chunks = s.text.match(/.{1,3}/gu);
+    setKey(true, t("demo.holding"));
+    hudSet("listening", t("hud.listening"), t("hud.release"));
+    await demoSleep(700, gen);
     let partial = "";
-    for (const ch of chunks) {
+    for (const ch of speechChunks(s.text)) {
       partial += ch;
       $("hudBody").textContent = partial;
-      await sleep(260);
+      await demoSleep(260, gen);
     }
-    await sleep(350);
+    await demoSleep(350, gen);
 
-    setKey(false, "松开");
-    hudSet("processing", "识别中…", s.text);
-    await sleep(800);
+    setKey(false, t("demo.released"));
+    hudSet("processing", t("hud.recognizing"), s.text);
+    await demoSleep(800, gen);
 
     target.textContent = s.text;
-    hudSet("success", "已输入", s.text);
-    await sleep(1000);
+    hudSet("success", t("hud.inserted"), s.text);
+    await demoSleep(1000, gen);
     hudHide();
-    setKey(false, "按住右 Option 说话");
+    setKey(false, t("demo.hint"));
 
     if (s.send) {
-      await sleep(700);
+      await demoSleep(700, gen);
       const out = $("bubbleOut");
       out.textContent = s.text;
       out.hidden = false;
       target.textContent = "";
     }
-    await sleep(1600);
+    await demoSleep(1600, gen);
+  }
+
+  function resetDemo() {
+    $("bubbleOut").hidden = true;
+    $("typed1").textContent = "";
+    $("typed2").textContent = "";
+    hudHide();
+    setKey(false, t("demo.hint"));
   }
 
   async function demoLoop() {
     const section = document.querySelector(".demo-section");
+    document.addEventListener("langchange", () => {
+      demoGen++;
+      resetDemo();
+    });
     for (;;) {
-      for (const s of SCRIPTS) {
-        await waitUntilActive(section);
-        await runOnce(s);
+      const gen = demoGen;
+      try {
+        for (const s of demoScripts()) {
+          await waitUntilActive(section);
+          await runOnce(s, gen);
+        }
+        await demoSleep(1200, gen);
+      } catch (e) {
+        if (e !== DEMO_ABORTED) throw e;
       }
-      await sleep(1200);
-      $("bubbleOut").hidden = true;
-      $("typed1").textContent = "";
+      resetDemo();
     }
   }
 
   function initClock() {
-    const days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
     const update = () => {
       const d = new Date();
-      $("mbTime").textContent = `${days[d.getDay()]} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+      $("mbTime").textContent = `${t("demo.days")[d.getDay()]} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     };
     update();
     setInterval(update, 30000);
+    document.addEventListener("langchange", update);
   }
 
   /* ---------- 透明度滑块：与 App 菜单里的效果一致 ---------- */
@@ -150,9 +177,10 @@
       const v = +range.value;
       $("odHud").style.setProperty("--hud-opacity", v / 100);
       $("odOut").textContent = `${v}%`;
-      $("odTitle").textContent = `悬浮窗透明度 ${v}%`;
+      $("odTitle").textContent = t("opacity.title", { v });
     };
     range.addEventListener("input", apply);
+    document.addEventListener("langchange", apply);
     apply();
   }
 
@@ -170,11 +198,11 @@
       btn.addEventListener("click", async () => {
         try {
           await navigator.clipboard.writeText($(btn.dataset.copy).textContent);
-          btn.textContent = "已复制";
+          btn.textContent = t("copy.done");
         } catch {
-          btn.textContent = "复制失败";
+          btn.textContent = t("copy.fail");
         }
-        setTimeout(() => (btn.textContent = "复制"), 1600);
+        setTimeout(() => (btn.textContent = t("copy.label")), 1600);
       });
     });
   }
