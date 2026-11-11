@@ -22,7 +22,7 @@
     "nav.donate": "Donate",
     "nav.download": "Free Download",
 
-    "hero.pill": "v1.2.1 · Native macOS · Apple Silicon &amp; Intel",
+    "hero.pill": "v1.3.0 · Native macOS · Apple Silicon &amp; Intel",
     "hero.title": 'Hold <kbd class="kbd-hero">⌥</kbd>,<br />\n        <span class="gradient-text">talk to type</span>',
     "hero.lead": "VoiceInput lives in your menu bar. In any editor, terminal or chat box, hold Right Option and speak — release, and the text appears at your cursor.",
     "hero.download": "Download for macOS",

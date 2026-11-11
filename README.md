@@ -181,8 +181,8 @@ tools/
 
 `package.sh` 会生成：
 
-- `dist/VoiceInput-1.2.1.dmg`：App + Applications 快捷方式 + 中文安装说明
-- `dist/VoiceInput-1.2.1.zip`：只含 App，适合直接传文件
+- `dist/VoiceInput-1.3.0.dmg`：App + Applications 快捷方式 + 中文安装说明
+- `dist/VoiceInput-1.3.0.zip`：只含 App，适合直接传文件
 
 ### 发版
 
