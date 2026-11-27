@@ -67,7 +67,7 @@ enum ReleaseChecker {
             if let error {
                 result = .failure(error)
             } else if let http = response as? HTTPURLResponse, http.statusCode != 200 {
-                result = .failure(UpdateError.message("GitHub 返回 \(http.statusCode)"))
+                result = .failure(UpdateError.message(L("GitHub 返回 \(http.statusCode)", "GitHub returned \(http.statusCode)")))
             } else {
                 result = Result { try newest(in: data ?? Data()) }
             }
@@ -127,7 +127,7 @@ final class UpdateDownloader: NSObject, URLSessionDownloadDelegate {
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         if let http = downloadTask.response as? HTTPURLResponse, http.statusCode != 200 {
-            finish(.failure(UpdateError.message("下载失败：服务器返回 \(http.statusCode)")))
+            finish(.failure(UpdateError.message(L("下载失败：服务器返回 \(http.statusCode)", "Download failed: server returned \(http.statusCode)"))))
             return
         }
         // location 在这个方法返回后就会被系统删除，必须在这里移走。
@@ -215,18 +215,18 @@ enum UpdateInstaller {
     private static func findApp(in folder: URL) throws -> URL {
         let items = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
         guard let app = items.first(where: { $0.pathExtension == "app" }) else {
-            throw UpdateError.message("安装包里没有找到 App")
+            throw UpdateError.message(L("安装包里没有找到 App", "No app found in the package"))
         }
         return app
     }
 
     private static func verify(_ app: URL, expected: AppVersion, bundleID: String) throws {
         guard let bundle = Bundle(url: app), bundle.bundleIdentifier == bundleID else {
-            throw UpdateError.message("安装包里的 App 不是 VoiceInput")
+            throw UpdateError.message(L("安装包里的 App 不是 VoiceInput", "The app in the package is not VoiceInput"))
         }
         let text = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
         guard let version = AppVersion(text), version == expected else {
-            throw UpdateError.message("安装包版本（\(text)）和发布版本 v\(expected) 不一致")
+            throw UpdateError.message(L("安装包版本（\(text)）和发布版本 v\(expected) 不一致", "Package version (\(text)) does not match release v\(expected)"))
         }
     }
 
@@ -243,7 +243,7 @@ enum UpdateInstaller {
         process.waitUntilExit()
         guard process.terminationStatus == 0 else {
             let name = (path as NSString).lastPathComponent
-            throw UpdateError.message("\(name) 失败：\(output.trimmingCharacters(in: .whitespacesAndNewlines))")
+            throw UpdateError.message(L("\(name) 失败：", "\(name) failed: ") + output.trimmingCharacters(in: .whitespacesAndNewlines))
         }
         return output
     }

@@ -75,6 +75,11 @@ cd voice-input
 - 历史只保存在内存里，退出 App 后清空；密码管理器标记为“机密”的内容不会记录
 - 不需要的话，在子菜单里取消「开启剪贴板历史」，`⇧⌘V` 也会还给其他应用
 
+## 界面语言
+
+界面默认跟随系统语言：系统首选语言是中文时显示中文，其他语言显示英文。
+也可以点菜单栏 🎤 →「界面语言」固定选「中文」或「English」，立即生效。
+
 ## 配置
 
 配置文件：`~/.config/voice-input/config.json`（第一次启动自动生成）。
@@ -95,6 +100,7 @@ cd voice-input
   "clipboardHistoryEnabled": true,  // 剪贴板历史，⇧⌘V 打开
   "clipboardHistorySize": 20,        // 记住最近几条，1 ~ 200
   "autoCheckUpdates": true,          // 自动检查 GitHub 上的新版本
+  "uiLanguage": "system",           // 界面语言：system 跟随系统，zh 中文，en 英文
 }
 ```
 
@@ -181,8 +187,8 @@ tools/
 
 `package.sh` 会生成：
 
-- `dist/VoiceInput-1.2.1.dmg`：App + Applications 快捷方式 + 中文安装说明
-- `dist/VoiceInput-1.2.1.zip`：只含 App，适合直接传文件
+- `dist/VoiceInput-1.3.0.dmg`：App + Applications 快捷方式 + 中文安装说明
+- `dist/VoiceInput-1.3.0.zip`：只含 App，适合直接传文件
 
 ### 发版
 

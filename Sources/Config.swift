@@ -15,6 +15,8 @@ struct Config: Codable {
     var clipboardHistoryEnabled: Bool
     var clipboardHistorySize: Int
     var autoCheckUpdates: Bool
+    /// 界面语言：system 跟随系统，zh 中文，en 英文。
+    var uiLanguage: String
 
     init() {
         locale = "zh-CN"
@@ -30,6 +32,7 @@ struct Config: Codable {
         clipboardHistoryEnabled = true
         clipboardHistorySize = 20
         autoCheckUpdates = true
+        uiLanguage = UILanguage.system.rawValue
         contextualStrings = [
             "OpenCode", "Claude Code", "Claude", "GitHub", "API", "CLI",
             "commit", "pull request", "bug", "refactor", "plugin", "terminal",
@@ -41,7 +44,7 @@ struct Config: Codable {
         case locale, hotkey, insertMethod, restoreClipboard, onDeviceRecognition
         case maxRecordingSeconds, minHoldSeconds, playFeedbackSound, showHUD
         case hudOpacity, contextualStrings
-        case clipboardHistoryEnabled, clipboardHistorySize, autoCheckUpdates
+        case clipboardHistoryEnabled, clipboardHistorySize, autoCheckUpdates, uiLanguage
     }
 
     init(from decoder: Decoder) throws {
@@ -62,6 +65,7 @@ struct Config: Codable {
             ?? d.clipboardHistoryEnabled
         clipboardHistorySize = try c.decodeIfPresent(Int.self, forKey: .clipboardHistorySize) ?? d.clipboardHistorySize
         autoCheckUpdates = try c.decodeIfPresent(Bool.self, forKey: .autoCheckUpdates) ?? d.autoCheckUpdates
+        uiLanguage = try c.decodeIfPresent(String.self, forKey: .uiLanguage) ?? d.uiLanguage
     }
 
     static var directory: URL {
