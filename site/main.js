@@ -2,6 +2,9 @@
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const $ = (id) => document.getElementById(id);
+  // 按当前页面语言二选一；i18n.js 没加载时退回中文
+  const t = (zh, en) => (window.I18N ? window.I18N.t(zh, en) : zh);
+  const onLangChange = (fn) => window.I18N && window.I18N.onChange(fn);
 
   /* ---------- 滚出屏幕或切到其他标签页时暂停动画和演示 ---------- */
   const onScreen = new WeakSet();
@@ -61,10 +64,15 @@
   }
 
   /* ---------- 首屏演示：模拟按住 ⌥ → 聆听 → 识别 → 输入 ---------- */
+  // 文案在每轮开始时取值，切换语言后下一轮生效
   const SCRIPTS = [
-    { target: "typed1", caret: "caret1", text: "修复登录页在深色模式下的显示问题" },
-    { target: "typed2", caret: "caret2", text: "很顺利，今晚八点准时发布新版本", send: true },
+    { target: "typed1", caret: "caret1", text: () => t("修复登录页在深色模式下的显示问题", "Fix login page layout in dark mode") },
+    { target: "typed2", caret: "caret2", text: () => t("很顺利，今晚八点准时发布新版本", "All good, shipping the new release at 8 tonight"), send: true },
   ];
+
+  // 边说边出字的分段：中文每 1~3 个字一段，英文每 1~2 个词一段
+  const speechChunks = (text) =>
+    /[\u4e00-\u9fff]/.test(text) ? text.match(/.{1,3}/gu) : text.match(/(\S+\s*){1,2}/g);
 
   function hudSet(state, title, body) {
     const hud = $("hud");
@@ -82,16 +90,17 @@
   }
 
   async function runOnce(s) {
+    const text = s.text();
     const target = $(s.target);
     target.textContent = "";
     for (const c of ["caret1", "caret2"]) $(c).classList.toggle("off", c !== s.caret);
     await sleep(900);
 
-    setKey(true, "按住右 Option 说话…");
-    hudSet("listening", "正在聆听…", "松开右 Option 结束");
+    setKey(true, t("按住右 Option 说话…", "Holding Right Option…"));
+    hudSet("listening", t("正在聆听…", "Listening…"), t("松开右 Option 结束", "Release Right Option to finish"));
     await sleep(700);
     // 边说边出字：按词组逐段更新识别中的文字
-    const chunks = s.text.match(/.{1,3}/gu);
+    const chunks = speechChunks(text);
     let partial = "";
     for (const ch of chunks) {
       partial += ch;
@@ -100,20 +109,20 @@
     }
     await sleep(350);
 
-    setKey(false, "松开");
-    hudSet("processing", "识别中…", s.text);
+    setKey(false, t("松开", "Released"));
+    hudSet("processing", t("识别中…", "Recognizing…"), text);
     await sleep(800);
 
-    target.textContent = s.text;
-    hudSet("success", "已输入", s.text);
+    target.textContent = text;
+    hudSet("success", t("已输入", "Inserted"), text);
     await sleep(1000);
     hudHide();
-    setKey(false, "按住右 Option 说话");
+    setKey(false, t("按住右 Option 说话", "Hold Right Option to speak"));
 
     if (s.send) {
       await sleep(700);
       const out = $("bubbleOut");
-      out.textContent = s.text;
+      out.textContent = text;
       out.hidden = false;
       target.textContent = "";
     }
@@ -134,13 +143,14 @@
   }
 
   function initClock() {
-    const days = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
     const update = () => {
+      const days = t(["周日", "周一", "周二", "周三", "周四", "周五", "周六"], ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
       const d = new Date();
       $("mbTime").textContent = `${days[d.getDay()]} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     };
     update();
     setInterval(update, 30000);
+    onLangChange(update);
   }
 
   /* ---------- 透明度滑块：与 App 菜单里的效果一致 ---------- */
@@ -150,9 +160,10 @@
       const v = +range.value;
       $("odHud").style.setProperty("--hud-opacity", v / 100);
       $("odOut").textContent = `${v}%`;
-      $("odTitle").textContent = `悬浮窗透明度 ${v}%`;
+      $("odTitle").textContent = t(`悬浮窗透明度 ${v}%`, `Overlay opacity ${v}%`);
     };
     range.addEventListener("input", apply);
+    onLangChange(apply);
     apply();
   }
 
@@ -170,11 +181,11 @@
       btn.addEventListener("click", async () => {
         try {
           await navigator.clipboard.writeText($(btn.dataset.copy).textContent);
-          btn.textContent = "已复制";
+          btn.textContent = t("已复制", "Copied");
         } catch {
-          btn.textContent = "复制失败";
+          btn.textContent = t("复制失败", "Copy failed");
         }
-        setTimeout(() => (btn.textContent = "复制"), 1600);
+        setTimeout(() => (btn.textContent = t("复制", "Copy")), 1600);
       });
     });
   }

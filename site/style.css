@@ -94,6 +94,20 @@ img { display: block; }
 .brand img { border-radius: 8px; }
 .nav-links { display: flex; gap: 2rem; font-size: 0.92rem; color: var(--muted); }
 .nav-links a:hover { color: var(--blue); }
+.nav-actions { display: flex; align-items: center; gap: 0.7rem; }
+/* 英文导航更长：不折行，中等宽度时收紧间距 */
+.nav-links a, .nav-actions .btn { white-space: nowrap; }
+@media (max-width: 1180px) { .nav-links { gap: clamp(0.9rem, 1.6vw, 2rem); } }
+/* 语言切换：两段胶囊，当前语言高亮 */
+.lang-switch {
+  display: inline-flex; padding: 3px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 0.78rem; font-weight: 600; line-height: 1;
+  border: 1px solid var(--line-strong); background: rgba(255, 255, 255, 0.7); color: var(--muted);
+}
+.lang-switch span { padding: 0.38em 0.6em; border-radius: 999px; transition: background 0.2s, color 0.2s; }
+html[lang="zh-CN"] .lang-switch span:first-child,
+html[lang="en"] .lang-switch span:last-child { background: var(--blue); color: #fff; }
+.lang-switch:hover { border-color: var(--blue); }
 
 /* ---------- 首屏 ---------- */
 .hero {
@@ -389,6 +403,7 @@ img { display: block; }
   background: linear-gradient(135deg, #f1f8ff, #effbf7); border: 1.5px dashed rgba(47, 191, 160, 0.45);
 }
 .privacy-viz::before { content: "你的 Mac"; position: absolute; top: 10px; left: 14px; font-size: 0.75rem; color: var(--mint); font-family: var(--mono); letter-spacing: 0.1em; font-weight: 600; }
+html[lang="en"] .privacy-viz::before { content: "YOUR MAC"; }
 .pv-node { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); }
 .pv-node svg { width: 54px; height: 54px; padding: 14px; border-radius: 16px; color: var(--blue); background: #fff; box-shadow: 0 6px 16px -8px rgba(59, 123, 246, 0.5); }
 .pv-node.chip svg { color: var(--mint); box-shadow: 0 0 0 4px rgba(47, 191, 160, 0.15), 0 6px 16px -6px rgba(47, 191, 160, 0.6); }
@@ -492,6 +507,7 @@ img { display: block; }
 }
 .cpn-head { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 14px; font-size: 13px; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .cpn-head svg { width: 18px; height: 18px; color: #52a3ff; }
+.cpn-head b { font-weight: inherit; }
 .cpn-head span { margin-left: auto; font-weight: 400; font-size: 11px; color: #9aa0b2; }
 .cpn-list { list-style: none; margin: 0; padding: 6px; }
 .cpn-list li {
