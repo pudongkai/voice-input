@@ -11,18 +11,17 @@ enum L10n {
     static var language: UILanguage = .system
 
     /// 跟随系统时，系统首选语言是中文就用中文，其余语言一律用英文。
-    static var isEnglish: Bool {
+    /// Locale.preferredLanguages 已包含「系统设置 → 通用 → 语言与地区 → App」里的单独设置。
+    static var isChinese: Bool {
         switch language {
-        case .zh: return false
-        case .en: return true
-        case .system:
-            let preferred = Locale.preferredLanguages.first ?? "en"
-            return !preferred.hasPrefix("zh")
+        case .zh: return true
+        case .en: return false
+        case .system: return (Locale.preferredLanguages.first ?? "en").lowercased().hasPrefix("zh")
         }
     }
 }
 
-/// 按当前界面语言在中英文之间选一个。文案在调用处按需求值，切换语言后下次显示即生效。
+/// 按当前界面语言返回中文或英文文本。文案在调用处按需求值，切换语言后下次显示即生效。
 func L(_ zh: String, _ en: String) -> String {
-    L10n.isEnglish ? en : zh
+    L10n.isChinese ? zh : en
 }

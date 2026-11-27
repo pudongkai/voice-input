@@ -94,8 +94,7 @@ final class UpdateController: NSObject {
         let version = release.version.description
         guard manual || defaults.string(forKey: Self.notifiedKey) != version else { return }
         defaults.set(version, forKey: Self.notifiedKey)
-        notify(L("发现新版本 v\(version)", "New version v\(version) available"),
-               L("点菜单栏的麦克风图标 →「更新到 v\(version)」", "Click the mic icon in the menu bar → \"Update to v\(version)\""), 6)
+        notify(L("发现新版本 v\(version)", "New version v\(version) available"), L("点菜单栏的麦克风图标 →「更新到 v\(version)」", "Click the menu bar mic icon → \"Update to v\(version)\""), 6)
     }
 
     // MARK: - Installing
@@ -107,8 +106,7 @@ final class UpdateController: NSObject {
         let downloader = UpdateDownloader(destination: destination)
         self.downloader = downloader
         progress = 0
-        notify(L("正在下载 v\(release.version)", "Downloading v\(release.version)"),
-               L("下载完成后会自动安装并重启", "It will install and restart automatically when done"), 2.4)
+        notify(L("正在下载 v\(release.version)", "Downloading v\(release.version)"), L("下载完成后会自动安装并重启", "It will install and restart automatically when done"), 2.4)
         downloader.start(release.dmgURL, progress: { [weak self] value in
             self?.progress = value
         }, finish: { [weak self] result in
@@ -133,8 +131,7 @@ final class UpdateController: NSObject {
     }
 
     private func install(_ dmg: URL, release: ReleaseInfo) {
-        notify(L("正在安装 v\(release.version)", "Installing v\(release.version)"),
-               L("完成后 VoiceInput 会自动重启", "VoiceInput will restart when done"), 3)
+        notify(L("正在安装 v\(release.version)", "Installing v\(release.version)"), L("完成后 VoiceInput 会自动重启", "VoiceInput will restart when done"), 3)
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Result { try UpdateInstaller.stage(dmg: dmg, expected: release.version) }
             DispatchQueue.main.async { [weak self] in
@@ -165,9 +162,7 @@ final class UpdateController: NSObject {
             try? FileManager.default.removeItem(at: target)
             try FileManager.default.moveItem(at: dmg, to: target)
             NSWorkspace.shared.open(target)
-            notify(L("安装包已下载", "Package downloaded"),
-                   L("当前 App 不在「应用程序」文件夹里，请把新版本拖进去替换",
-                     "This app is not in the Applications folder. Drag the new version there to replace it"), 5)
+            notify(L("安装包已下载", "Update downloaded"), L("当前 App 不在「应用程序」文件夹里，请把新版本拖进去替换", "This app is not in the Applications folder. Drag the new version there to replace it."), 5)
         } catch {
             notify(L("下载失败", "Download failed"), error.localizedDescription, 3)
         }

@@ -57,8 +57,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             guard let self, self.config.showHUD else { return }
             self.hud.showInfo(
                 title: L("语音输入已就绪", "Voice input is ready"),
-                body: L("按住右 Option 说话，松开自动输入到当前窗口",
-                        "Hold Right Option and speak; release to type into the current window"),
+                body: L("按住右 Option 说话，松开自动输入到当前窗口", "Hold Right Option to speak; release to type into the current window"),
                 autoHide: 3.0
             )
         }
@@ -106,8 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             self.hotkey.stop()
             self.hotkey.start()
             if trusted {
-                self.showNotice(L("辅助功能已授权", "Accessibility granted"),
-                                L("现在可以按住右 Option 说话了", "You can now hold Right Option to speak"))
+                self.showNotice(L("辅助功能已授权", "Accessibility granted"), L("现在可以按住右 Option 说话了", "You can now hold Right Option to speak"))
             }
         }
     }
@@ -136,23 +134,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         guard Permissions.microphoneGranted else {
             Permissions.requestMicrophone()
-            showNotice(L("需要麦克风权限", "Microphone access needed"),
-                       L("请在系统设置中允许「VoiceInput」使用麦克风，然后重试",
-                         "Allow VoiceInput to use the microphone in System Settings, then try again"))
+            showNotice(L("需要麦克风权限", "Microphone access needed"), L("请在系统设置中允许「VoiceInput」使用麦克风，然后重试", "Allow VoiceInput to use the microphone in System Settings, then try again"))
             return
         }
         guard Permissions.speechGranted else {
             Permissions.requestSpeech()
-            showNotice(L("需要语音识别权限", "Speech recognition access needed"),
-                       L("请在系统设置中允许「VoiceInput」使用语音识别，然后重试",
-                         "Allow VoiceInput to use speech recognition in System Settings, then try again"))
+            showNotice(L("需要语音识别权限", "Speech recognition access needed"), L("请在系统设置中允许「VoiceInput」使用语音识别，然后重试", "Allow VoiceInput to use speech recognition in System Settings, then try again"))
             return
         }
         guard Permissions.accessibilityGranted else {
             Permissions.promptAccessibility()
-            showNotice(L("需要辅助功能权限", "Accessibility access needed"),
-                       L("请在系统设置中授权，否则无法监听快捷键和输入文字",
-                         "Grant it in System Settings so VoiceInput can detect the hotkey and type text"))
+            showNotice(L("需要辅助功能权限", "Accessibility access needed"), L("请在系统设置中授权，否则无法监听快捷键和输入文字", "Grant access in System Settings; otherwise the hotkey and text input won't work"))
             return
         }
 
@@ -239,7 +231,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 if config.showHUD {
                     hud.showInfo(
                         title: L("没听清", "Didn't catch that"),
-                        body: L("没有识别到内容，请靠近麦克风再说一次", "Nothing was recognized. Move closer to the mic and try again"),
+                        body: L("没有识别到内容，请靠近麦克风再说一次", "Nothing was recognized. Move closer to the mic and try again."),
                         autoHide: 2.2
                     )
                 }
@@ -303,8 +295,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     /// 设置页每次运行只自动打开一次，避免用户每按一次快捷键就被弹一次窗口。
     private func handleDictationDisabled() {
-        notify(L("请先打开系统「听写」：系统设置 → 键盘 → 听写",
-                 "Turn on Dictation first: System Settings → Keyboard → Dictation"))
+        notify(L("请先打开系统「听写」：系统设置 → 键盘 → 听写", "Turn on Dictation first: System Settings → Keyboard → Dictation"))
         guard !openedDictationSettings else { return }
         openedDictationSettings = true
         Permissions.openDictationSettings()
@@ -357,7 +348,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if !lastTranscript.isEmpty {
-            let item = NSMenuItem(title: L("最近：", "Last: ") + lastTranscript.prefix(24), action: nil, keyEquivalent: "")
+            let item = NSMenuItem(title: L("最近：", "Latest: ") + lastTranscript.prefix(24), action: nil, keyEquivalent: "")
             item.isEnabled = false
             menu.addItem(item)
         }
@@ -380,7 +371,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let insertItem = NSMenuItem(title: L("输入方式", "Insert Method"), action: nil, keyEquivalent: "")
+        let insertItem = NSMenuItem(title: L("输入方式", "Input Method"), action: nil, keyEquivalent: "")
         let insertMenu = NSMenu()
         insertMenu.addItem(methodItem(title: L("模拟键盘输入", "Simulate Typing"), value: "type"))
         insertMenu.addItem(methodItem(title: L("粘贴（同时复制到剪贴板）", "Paste (also copies to clipboard)"), value: "paste"))
@@ -389,24 +380,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         let onDeviceTitle: String
         if config.onDeviceRecognition && !onDeviceAvailable {
-            onDeviceTitle = L("设备端识别（语言包未下载）", "On-Device Recognition (language pack missing)")
+            onDeviceTitle = L("设备端识别（语言包未下载）", "On-Device Recognition (language pack not downloaded)")
         } else {
             onDeviceTitle = L("设备端识别", "On-Device Recognition")
         }
         menu.addItem(toggleItem(title: onDeviceTitle, on: config.onDeviceRecognition,
                                 action: #selector(toggleOnDevice)))
-        menu.addItem(toggleItem(title: L("播放提示音", "Play Feedback Sound"), on: config.playFeedbackSound,
+        menu.addItem(toggleItem(title: L("播放提示音", "Play Sounds"), on: config.playFeedbackSound,
                                 action: #selector(toggleSound)))
-        menu.addItem(toggleItem(title: L("显示悬浮提示", "Show Floating Hints"), on: config.showHUD,
+        menu.addItem(toggleItem(title: L("显示悬浮提示", "Show Floating HUD"), on: config.showHUD,
                                 action: #selector(toggleHUD)))
 
-        let opacityItem = NSMenuItem(title: L("悬浮窗透明度", "Overlay Opacity"), action: nil, keyEquivalent: "")
+        let opacityItem = NSMenuItem(title: L("悬浮窗透明度", "HUD Opacity"), action: nil, keyEquivalent: "")
         let rowWidth: CGFloat = 300
         let opacityView = NSView(frame: NSRect(x: 0, y: 0, width: rowWidth, height: 24))
         opacityView.autoresizingMask = [.width]
 
         let percent = Int((config.hudOpacity * 100).rounded())
-        let opacityLabel = NSTextField(labelWithString: L("悬浮窗透明度", "Opacity"))
+        let opacityLabel = NSTextField(labelWithString: L("悬浮窗透明度", "HUD Opacity"))
         opacityLabel.font = .menuFont(ofSize: 0)
         opacityLabel.textColor = .labelColor
         opacityLabel.frame = NSRect(x: 22, y: 4, width: 85, height: 16)
@@ -437,7 +428,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         menu.addItem(.separator())
         menu.addItem(clipboardMenuItem())
-
         menu.addItem(languageMenuItem())
 
         menu.addItem(.separator())
@@ -516,8 +506,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func updateToolTip() {
-        statusItem.button?.toolTip = L("VoiceInput \(appVersion)：按住右 Option 说话",
-                                       "VoiceInput \(appVersion): hold Right Option to speak")
+        statusItem.button?.toolTip = "VoiceInput \(appVersion)" + L("：按住右 Option 说话", ": hold Right Option to speak")
     }
 
     /// 语言名用各自的语言书写，切错语言后也能认出来。
@@ -586,8 +575,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func pasteFromHistory(_ entry: ClipboardEntry, delay: TimeInterval) {
         clipboardHistory.restore(entry)
         guard Permissions.accessibilityGranted else {
-            showNotice(L("已复制到剪贴板", "Copied to clipboard"),
-                       L("授权辅助功能后可以直接粘贴，现在请按 ⌘V", "Grant Accessibility to paste directly. Press ⌘V for now"))
+            showNotice(L("已复制到剪贴板", "Copied to clipboard"), L("授权辅助功能后可以直接粘贴，现在请按 ⌘V", "Grant Accessibility to paste directly. For now, press ⌘V."))
             return
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
@@ -601,7 +589,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if config.clipboardHistoryEnabled {
             addHistoryEntries(to: submenu)
             submenu.addItem(.separator())
-            let open = actionItem(title: L("打开历史列表", "Show History List"), action: #selector(openClipboardPicker))
+            let open = actionItem(title: L("打开历史列表", "Open History List"), action: #selector(openClipboardPicker))
             open.keyEquivalent = "v"
             open.keyEquivalentModifierMask = [.command, .shift]
             submenu.addItem(open)
@@ -753,10 +741,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
             Permissions.openAccessibilitySettings()
-            self?.showNotice(L("打开 VoiceInput 的开关", "Turn on the VoiceInput switch"),
-                             L("列表里没有的话，点下方「+」从「应用程序」添加 VoiceInput",
-                               "If it's not listed, click \"+\" below and add VoiceInput from Applications"),
-                             duration: 10)
+            self?.showNotice(L("打开 VoiceInput 的开关", "Turn on the switch for VoiceInput"), L("列表里没有的话，点下方「+」从「应用程序」添加 VoiceInput", "If it isn't listed, click \"+\" below and add VoiceInput from Applications"),
+                            duration: 10)
         }
     }
 
@@ -786,7 +772,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if config.onDeviceRecognition && !onDeviceAvailable {
             showAlert(
                 L("设备端语言包未下载", "On-device language pack not downloaded"),
-                L("当前语言（\(config.locale)）还不能在本机识别，会先使用 Apple 在线识别。\n\n要启用设备端识别：打开 系统设置 → 键盘 → 听写，开启听写并添加该语言，等待语言包下载完成后，再重新勾选本项。",
+                L("当前语言（\(config.locale)）还不能在本机识别，会先使用 Apple 在线识别。\n\n要启用设备端识别：打开 系统设置 → 键盘 → 听写，开启听写并添加中文，等待语言包下载完成后，再重新勾选本项。",
                   "The current language (\(config.locale)) can't be recognized on this Mac yet, so Apple's online recognition will be used for now.\n\nTo enable on-device recognition: open System Settings → Keyboard → Dictation, turn on Dictation and add this language, wait for the language pack to download, then check this option again.")
             )
         }
@@ -813,8 +799,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             label.stringValue = "\(percent)%"
         }
         if config.showHUD {
-            hud.showInfo(title: L("悬浮窗透明度 \(percent)%", "Overlay opacity \(percent)%"),
-                         body: L("拖动滑块查看效果", "Drag the slider to preview"), autoHide: 0.9)
+            hud.showInfo(title: L("悬浮窗透明度 \(percent)%", "HUD Opacity \(percent)%"), body: L("拖动滑块查看效果", "Drag the slider to preview"), autoHide: 0.9)
         }
     }
 
@@ -864,7 +849,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 try SMAppService.mainApp.register()
             }
         } catch {
-            showAlert(L("设置开机启动失败", "Failed to change Launch at Login"), error.localizedDescription)
+            showAlert(L("设置开机启动失败", "Failed to set Launch at Login"), error.localizedDescription)
         }
     }
 }
